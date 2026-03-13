@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - STTpro</title>
+    <meta name="description" content="Manage your STTpro account, license key, and subscription.">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <meta name="theme-color" content="#007AFF">
+
+    <!-- Fonts & Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ============ Account Page ============ */
+        .account-section {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7rem 2rem 4rem;
+            background: var(--bg-primary);
+        }
+
+        /* ---- Auth Card (Login / Register) ---- */
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.75rem;
+            color: var(--text-primary);
+        }
+
+        /* Tabs */
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.75rem 0;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+
+        .auth-tab::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.25s ease;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+        }
+
+        .auth-tab.active::after {
+            transform: scaleX(1);
+        }
+
+        .auth-tab:hover:not(.active) {
+            color: var(--text-secondary);
+        }
+
+        /* Forms */
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .form-actions {
+            margin-top: 1.75rem;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.85rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.25rem;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .form-footer a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .form-message {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .form-message.error {
+            display: block;
+            background: rgba(255, 59, 48, 0.08);
+            color: var(--error);
+        }
+
+        .form-message.success {
+            display: block;
+            background: rgba(52, 199, 89, 0.08);
+            color: var(--secondary);
+        }
+
+        /* ---- Dashboard ---- */
+        .dashboard {
+            width: 100%;
+            max-width: 700px;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dashboard-card h3 svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary);
+        }
+
+        .license-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .license-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .license-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .license-field .field-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .license-field .field-value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .status-badge.active {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--secondary);
+        }
+
+        .status-badge.active::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+        }
+
+        .status-badge.trial {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent);
+        }
+
+        .status-badge.trial::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .status-badge.expired {
+            background: rgba(255, 59, 48, 0.08);
+            color: var(--error);
+        }
+
+        .status-badge.expired::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--error);
+        }
+
+        /* Account Actions */
+        .account-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .btn-danger {
+            color: var(--error);
+            border-color: rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-danger:hover {
+            color: var(--error);
+            border-color: var(--error);
+            background: rgba(255, 59, 48, 0.04);
+        }
+
+        /* ---- Change Password Modal ---- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-xl);
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .modal-card h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 600px) {
+            .account-section {
+                padding: 5.5rem 1.25rem 3rem;
+                align-items: flex-start;
+            }
+
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .dashboard-card {
+                padding: 1.5rem;
+            }
+
+            .license-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .account-actions {
+                flex-direction: column;
+            }
+
+            .account-actions .btn-outline {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                STTpro
+            </a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Docs</a>
+                <a href="account.html">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Account Section -->
+    <section class="account-section">
+
+        <!-- ============ Login / Register Card ============ -->
+        <div class="auth-card" id="authCard">
+            <h2>Your Account</h2>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">Login</button>
+                <button class="auth-tab" data-tab="register" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+                <div class="form-footer">
+                    <a href="#" onclick="handleForgotPassword(event)">Forgot password?</a>
+                </div>
+                <div class="form-message" id="loginMessage"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Create a password" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirm">Confirm Password</label>
+                    <input type="password" id="registerConfirm" placeholder="Confirm your password" required minlength="8">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+                <div class="form-message" id="registerMessage"></div>
+            </form>
+        </div>
+
+        <!-- ============ Dashboard ============ -->
+        <div class="dashboard" id="dashboard">
+            <div class="dashboard-header">
+                <h1>Welcome back</h1>
+                <p id="dashboardEmail">user@example.com</p>
+            </div>
+
+            <!-- License Card -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    License
+                </h3>
+                <div class="license-grid">
+                    <div class="license-field full-width">
+                        <span class="field-label">License Key</span>
+                        <span class="field-value" id="licenseKey">XXXX-XXXX-XXXX-XXXX</span>
+                    </div>
+                    <div class="license-field">
+                        <span class="field-label">Status</span>
+                        <span>
+                            <span class="status-badge active" id="licenseStatus">Active</span>
+                        </span>
+                    </div>
+                    <div class="license-field">
+                        <span class="field-label">Machine ID</span>
+                        <span class="field-value" id="machineId">a1b2c3d4e5f6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Actions Card -->
+            <div class="dashboard-card">
+                <h3>
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    Account
+                </h3>
+                <div class="account-actions">
+                    <button class="btn-outline" onclick="openChangePassword()">
+                        <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+                        Change Password
+                    </button>
+                    <button class="btn-outline btn-danger" onclick="handleLogout()">
+                        <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal-card">
+            <h3>Change Password</h3>
+            <form onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" placeholder="Enter current password" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Confirm new password" required minlength="8">
+                </div>
+                <div class="form-message" id="changePasswordMessage"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeChangePassword()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </div>
+                    STTpro
+                </a>
+                <p>Professional speech-to-text for Windows, powered by Whisper AI.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Documentation</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="account.html">My Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="refund.html">Refund Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 STTpro. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        // ============ Tab Switching ============
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.auth-tab').forEach(function(t) {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            // Update forms
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            // Clear messages
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.querySelectorAll('.form-message').forEach(function(m) {
+                m.className = 'form-message';
+                m.textContent = '';
+            });
+        }
+
+        function showMessage(elementId, text, type) {
+            var el = document.getElementById(elementId);
+            el.textContent = text;
+            el.className = 'form-message ' + type;
+        }
+
+        // ============ Login ============
+        function handleLogin(e) {
+            e.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            var password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMessage('loginMessage', 'Please fill in all fields.', 'error');
+                return;
+            }
+
+            // Simulated login success
+            showDashboard(email);
+        }
+
+        // ============ Register ============
+        function handleRegister(e) {
+            e.preventDefault();
+            var email = document.getElementById('registerEmail').value.trim();
+            var password = document.getElementById('registerPassword').value;
+            var confirm = document.getElementById('registerConfirm').value;
+
+            if (!email || !password || !confirm) {
+                showMessage('registerMessage', 'Please fill in all fields.', 'error');
+                return;
+            }
+
+            if (password !== confirm) {
+                showMessage('registerMessage', 'Passwords do not match.', 'error');
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage('registerMessage', 'Password must be at least 8 characters.', 'error');
+                return;
+            }
+
+            showMessage('registerMessage', 'Account created successfully! You can now log in.', 'success');
+            setTimeout(function() {
+                switchTab('login');
+                document.getElementById('loginEmail').value = email;
+            }, 1500);
+        }
+
+        // ============ Forgot Password ============
+        function handleForgotPassword(e) {
+            e.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            if (!email) {
+                showMessage('loginMessage', 'Enter your email above, then click forgot password.', 'error');
+                return;
+            }
+            showMessage('loginMessage', 'Password reset link sent to ' + email, 'success');
+        }
+
+        // ============ Show Dashboard ============
+        function showDashboard(email) {
+            document.getElementById('authCard').style.display = 'none';
+            var dashboard = document.getElementById('dashboard');
+            dashboard.classList.add('active');
+            document.getElementById('dashboardEmail').textContent = email;
+
+            // Simulated license data
+            document.getElementById('licenseKey').textContent = 'STTP-R4K9-M2X7-Q8B1';
+            document.getElementById('machineId').textContent = 'a3f8c1d7e5b2';
+        }
+
+        // ============ Logout ============
+        function handleLogout() {
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('authCard').style.display = '';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            clearMessages();
+        }
+
+        // ============ Change Password Modal ============
+        function openChangePassword() {
+            document.getElementById('changePasswordModal').classList.add('active');
+        }
+
+        function closeChangePassword() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            var msg = document.getElementById('changePasswordMessage');
+            msg.className = 'form-message';
+            msg.textContent = '';
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            var current = document.getElementById('currentPassword').value;
+            var newPw = document.getElementById('newPassword').value;
+            var confirm = document.getElementById('confirmNewPassword').value;
+
+            if (!current || !newPw || !confirm) {
+                showMessage('changePasswordMessage', 'Please fill in all fields.', 'error');
+                return;
+            }
+
+            if (newPw !== confirm) {
+                showMessage('changePasswordMessage', 'New passwords do not match.', 'error');
+                return;
+            }
+
+            if (newPw.length < 8) {
+                showMessage('changePasswordMessage', 'Password must be at least 8 characters.', 'error');
+                return;
+            }
+
+            showMessage('changePasswordMessage', 'Password updated successfully!', 'success');
+            setTimeout(closeChangePassword, 1500);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('changePasswordModal').addEventListener('click', function(e) {
+            if (e.target === this) closeChangePassword();
+        });
+    </script>
+</body>
+</html>

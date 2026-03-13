@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>Download STTpro - Speech-to-Text for Windows</title>
+    <meta name="description" content="Download STTpro for Windows. Professional speech-to-text powered by Whisper AI with global hotkeys, smart prompts, and transcript history.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <meta name="theme-color" content="#007AFF">
+
+    <!-- Fonts & Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ============ Download Page ============ */
+        .download-page {
+            padding: 7rem 2rem 4rem;
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+
+        .download-card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .download-card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .download-card-header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .download-card-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .download-card-header .version-tag {
+            display: inline-block;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ============ Quick Start ============ */
+        .quick-start {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-start-step {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            font-size: 0.93rem;
+            color: var(--text-secondary);
+        }
+
+        .qs-num {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ============ Update Checker ============ */
+        .update-checker {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .update-checker-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--secondary), #2AA648);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .update-checker-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        .update-checker-text {
+            flex: 1;
+        }
+
+        .update-checker-text .status {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.15rem;
+        }
+
+        .update-checker-text .detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .update-checker-badge {
+            background: rgba(52, 199, 89, 0.12);
+            color: var(--secondary);
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ============ Download Button ============ */
+        .download-btn-wrap {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--primary);
+            color: white;
+            padding: 1.1rem 2.5rem;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-download:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 122, 255, 0.35);
+        }
+
+        .btn-download svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .download-note {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+        }
+
+        /* ============ System Requirements ============ */
+        .requirements-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .requirements-section h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .requirements-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .requirements-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .requirements-list li svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary);
+            flex-shrink: 0;
+        }
+
+        /* ============ Version History ============ */
+        .version-history {
+            margin-bottom: 0;
+        }
+
+        .version-history h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .version-entry {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .version-entry:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .version-entry-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-entry-header .ver {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .version-entry-header .date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .version-entry-header .tag-latest {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary);
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .version-entry ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .version-entry ul li {
+            position: relative;
+            padding-left: 1.25rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .version-entry ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.65em;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 768px) {
+            .download-page {
+                padding: 5.5rem 1.25rem 3rem;
+            }
+
+            .download-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .download-card-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .update-checker {
+                flex-wrap: wrap;
+            }
+
+            .btn-download {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                STTpro
+            </a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Docs</a>
+                <a href="account.html">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Download Section -->
+    <section class="download-page">
+        <div class="download-card fade-in-up">
+            <div class="download-card-header">
+                <h1>Download STTpro</h1>
+                <p>Professional speech-to-text for Windows 10 and Windows 11.<br>Bring your own API key. No subscription, no monthly fees.</p>
+            </div>
+
+            <!-- Download Button -->
+            <div class="download-btn-wrap">
+                <a href="#" class="btn-download">
+                    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    Download for Windows
+                </a>
+                <p class="download-note">STTpro v1.0.0 &middot; Windows 10/11 &middot; 12 MB &middot; Free trial included</p>
+            </div>
+
+            <!-- Quick start steps -->
+            <div class="quick-start">
+                <div class="quick-start-step">
+                    <span class="qs-num">1</span>
+                    <span>Download &amp; install STTpro</span>
+                </div>
+                <div class="quick-start-step">
+                    <span class="qs-num">2</span>
+                    <span>Enter your OpenAI API key in settings</span>
+                </div>
+                <div class="quick-start-step">
+                    <span class="qs-num">3</span>
+                    <span>Press your hotkey and start dictating</span>
+                </div>
+            </div>
+
+            <!-- System Requirements -->
+            <div class="requirements-section">
+                <h2>System Requirements</h2>
+                <ul class="requirements-list">
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Windows 10 (version 1903+) or Windows 11
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        .NET 8 Runtime (included in installer)
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Microphone or audio input device
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        OpenAI API key (for Whisper transcription)
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Internet connection (for API calls)
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Version History -->
+            <div class="version-history">
+                <h2>Version History</h2>
+
+                <div class="version-entry">
+                    <div class="version-entry-header">
+                        <span class="ver">v1.0.0</span>
+                        <span class="date">March 2026</span>
+                        <span class="tag-latest">Latest</span>
+                    </div>
+                    <ul>
+                        <li>Initial public release</li>
+                        <li>Whisper AI transcription with automatic language detection</li>
+                        <li>Global hotkeys with customizable key bindings</li>
+                        <li>Smart Prompts powered by GPT post-processing</li>
+                        <li>Transcript history with search and export</li>
+                        <li>Automatic silence detection</li>
+                        <li>System tray integration with recording indicator</li>
+                    </ul>
+                </div>
+
+                <div class="version-entry">
+                    <div class="version-entry-header">
+                        <span class="ver">v0.9.0</span>
+                        <span class="date">February 2026</span>
+                    </div>
+                    <ul>
+                        <li>Public beta release</li>
+                        <li>Added DPAPI encryption for API key storage</li>
+                        <li>Improved audio device selection</li>
+                        <li>Bug fixes and performance improvements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </div>
+                    STTpro
+                </a>
+                <p>Professional speech-to-text for Windows, powered by Whisper AI.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Documentation</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="account.html">My Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="refund.html">Refund Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 STTpro. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

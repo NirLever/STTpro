@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>STTpro - Professional Speech-to-Text for Windows | Voice Transcription</title>
+    <meta name="description" content="STTpro turns your voice into text instantly. Powered by Whisper AI with global hotkeys, smart prompts, transcript history, and more. Free trial for Windows.">
+    <meta name="keywords" content="speech to text, voice transcription, whisper ai, dictation software, windows voice typing, transcription tool, stt, voice recognition">
+    <meta name="author" content="STTpro">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="STTpro - Professional Speech-to-Text for Windows">
+    <meta property="og:description" content="Turn your voice into text instantly. Powered by Whisper AI with global hotkeys, smart prompts, and transcript history.">
+    <meta property="og:site_name" content="STTpro">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <meta name="theme-color" content="#007AFF">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "STTpro",
+        "operatingSystem": "Windows 10, Windows 11",
+        "applicationCategory": "UtilitiesApplication",
+        "description": "Professional speech-to-text tool for Windows powered by Whisper AI.",
+        "featureList": [
+            "Whisper AI Transcription",
+            "Global Hotkeys",
+            "Smart Prompts with GPT",
+            "Transcript History",
+            "Silence Detection",
+            "Multiple Audio Devices",
+            "System Tray Integration"
+        ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How does STTpro work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "STTpro captures your microphone audio when you press a hotkey, sends it to the Whisper AI API for transcription, and types the result directly into any application."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need an API key?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, STTpro uses your own OpenAI API key for Whisper transcription. This means you only pay for what you use with no subscription fees to us."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does it work with any application?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! STTpro types transcribed text directly into whatever application has focus - browsers, editors, chat apps, email, and more."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <!-- Fonts & Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ============ Hero ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 7rem 2rem 4rem;
+            background: var(--bg-hero);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -15%;
+            width: 70%;
+            height: 140%;
+            background: radial-gradient(circle, rgba(0, 122, 255, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero-content h1 span {
+            background: linear-gradient(135deg, var(--primary), #5856D6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            max-width: 480px;
+            line-height: 1.7;
+        }
+
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hero-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--primary);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .hero-stat .number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hero-stat .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-app-preview {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .preview-header .win-icon {
+            flex-shrink: 0;
+        }
+
+        .preview-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .win-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .win-controls svg {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        .preview-waveform {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            height: 60px;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            animation: waveAnimation 1.2s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes waveAnimation {
+            0%, 100% { height: 8px; opacity: 0.4; }
+            50% { height: 100%; opacity: 0.9; }
+        }
+
+        .preview-transcript {
+            background: var(--bg-input);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-transcript p {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .preview-transcript .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 16px;
+            background: var(--primary);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .preview-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-meta span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .preview-meta .badge {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Floating elements */
+        .float-element {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            box-shadow: var(--shadow-md);
+            font-size: 0.8rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .float-hotkey {
+            top: -10px;
+            right: -20px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            color: var(--primary);
+            font-weight: 600;
+            animation-delay: 0.5s;
+        }
+
+        .float-accuracy {
+            bottom: 40px;
+            left: -30px;
+            color: var(--secondary);
+            font-weight: 600;
+            animation-delay: 1s;
+        }
+
+        @media (max-width: 1000px) {
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+                min-height: auto;
+            }
+
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-visual {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .float-element {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+        }
+
+        /* ============ Features ============ */
+        .features-section {
+            padding: 6rem 0;
+            background: var(--bg-card);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+        }
+
+        .feature-icon.green {
+            background: linear-gradient(135deg, var(--secondary), #2AA648);
+        }
+
+        .feature-icon.orange {
+            background: linear-gradient(135deg, var(--accent), #E68600);
+        }
+
+        .feature-icon.purple {
+            background: linear-gradient(135deg, #5856D6, #4240A8);
+        }
+
+        .feature-icon.red {
+            background: linear-gradient(135deg, var(--error), #CC2F26);
+        }
+
+        .feature-icon.teal {
+            background: linear-gradient(135deg, #5AC8FA, #32ADE6);
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.93rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============ How It Works ============ */
+        .how-it-works {
+            padding: 6rem 0;
+            background: var(--bg-primary);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0.3;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 auto 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+
+            .steps-grid::before {
+                display: none;
+            }
+        }
+
+        /* ============ Showcase / Demo ============ */
+        .showcase {
+            padding: 6rem 0;
+            background: var(--bg-card);
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .showcase-content h2 {
+            font-size: 2.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .showcase-content p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .showcase-list {
+            list-style: none;
+        }
+
+        .showcase-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .showcase-list li svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary);
+            flex-shrink: 0;
+        }
+
+        .showcase-visual {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .showcase-visual .hotkey-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            box-shadow: 0 2px 0 var(--border);
+        }
+
+        .key-plus {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .showcase-visual .output-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .output-box .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .output-box p {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .showcase-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+        }
+
+        /* ============ FAQ ============ */
+        .faq-section {
+            padding: 6rem 0;
+            background: var(--bg-primary);
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover {
+            color: var(--primary);
+        }
+
+        .faq-question svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .faq-item.active .faq-question svg {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-answer-inner {
+            padding: 0 1.5rem 1.25rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+
+        /* ============ CTA ============ */
+        .cta-section {
+            padding: 6rem 0;
+            background: var(--bg-card);
+        }
+
+        .cta-box {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), #5856D6);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            color: white;
+        }
+
+        .cta-box h2 {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-box .btn {
+            background: white;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .cta-box .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .cta-box {
+                padding: 3rem 1.5rem;
+            }
+
+            .cta-box h2 {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* ============ Cost Comparison ============ */
+        .cost-section {
+            padding: 6rem 0;
+            background: var(--bg-primary);
+        }
+
+        .cost-comparison {
+            display: flex;
+            align-items: stretch;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .cost-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem;
+            flex: 1;
+            max-width: 380px;
+            position: relative;
+        }
+
+        .cost-card.competitor {
+            opacity: 0.85;
+        }
+
+        .cost-card.sttpro {
+            border: 2px solid var(--primary);
+            box-shadow: 0 8px 30px rgba(0, 122, 255, 0.12);
+        }
+
+        .cost-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .cost-card-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .cost-label {
+            display: block;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .cost-type {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .cost-price {
+            margin-bottom: 0.25rem;
+        }
+
+        .cost-amount {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .cost-card.sttpro .cost-amount {
+            color: var(--primary);
+        }
+
+        .cost-period {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .cost-annual {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .cost-details {
+            list-style: none;
+        }
+
+        .cost-details li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .cost-details li::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background-size: 12px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .cost-details li.positive::before {
+            background-color: rgba(52, 199, 89, 0.15);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%2334C759' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+        }
+
+        .cost-details li.negative::before {
+            background-color: rgba(255, 59, 48, 0.1);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23FF3B30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+        }
+
+        .cost-vs {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
+        .savings-calculator {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .calc-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .calc-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .calc-input-row {
+            margin-bottom: 2rem;
+        }
+
+        .calc-input-row label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .calc-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .calc-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--border-light);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .calc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            transition: transform 0.15s;
+        }
+
+        .calc-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .calc-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+
+        .calc-slider-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 130px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .calc-results {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calc-result-col {
+            flex: 1;
+            text-align: center;
+            background: var(--bg-primary);
+            border-radius: 14px;
+            padding: 1.5rem 1rem;
+            border: 2px solid transparent;
+        }
+
+        .calc-result-col:first-child {
+            border-color: var(--primary);
+        }
+
+        .calc-result-col.competitor {
+            opacity: 0.7;
+        }
+
+        .calc-result-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .calc-result-monthly {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .calc-result-col:first-child .calc-result-monthly {
+            color: var(--primary);
+        }
+
+        .calc-result-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .calc-result-yearly {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .calc-result-col.competitor .calc-result-monthly {
+            text-decoration: line-through;
+            text-decoration-color: var(--error);
+            color: var(--text-muted);
+        }
+
+        .calc-result-vs {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .calc-savings-banner {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.1), rgba(52, 199, 89, 0.05));
+            border: 1px solid rgba(52, 199, 89, 0.25);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calc-savings-amount {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .calc-savings-amount strong {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .calc-savings-pct {
+            background: var(--secondary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .savings-note {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .calc-results {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .calc-result-col {
+                width: 100%;
+            }
+
+            .calc-savings-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cost-comparison {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cost-card {
+                max-width: 100%;
+            }
+
+            .cost-vs {
+                transform: rotate(90deg);
+            }
+
+            .savings-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                STTpro
+            </a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Docs</a>
+                <a href="account.html">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Your Voice,<br><span>Instantly Typed</span></h1>
+                <p class="tagline">Bring your own OpenAI API key and pay only for what you use &mdash; no subscriptions, no monthly fees. STTpro is a one-time purchase that puts you in full control of your speech-to-text costs.</p>
+
+                <div class="hero-badges">
+                    <div class="hero-badge">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Bring Your Own API Key
+                    </div>
+                    <div class="hero-badge">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        No Subscription
+                    </div>
+                    <div class="hero-badge">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Track Costs In-App
+                    </div>
+                    <div class="hero-badge">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        50+ Languages
+                    </div>
+                </div>
+
+                <div class="hero-buttons">
+                    <a href="download.html" class="btn btn-primary btn-large">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        Download Free Trial
+                    </a>
+                    <a href="docs.html" class="btn btn-secondary btn-large">Learn More</a>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="number">~$1</div>
+                        <div class="label">Avg. monthly API cost</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number">$0</div>
+                        <div class="label">Subscription fees</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="number">50+</div>
+                        <div class="label">Languages</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="hero-app-preview">
+                    <div class="preview-header">
+                        <svg class="win-icon" width="16" height="16" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                        <span class="preview-title">STTpro &mdash; Recording</span>
+                        <div class="win-controls">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M19 13H5v-2h14v2z"/></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="preview-waveform" id="waveform">
+                    </div>
+
+                    <div class="preview-transcript">
+                        <p id="typed-text"></p>
+                    </div>
+
+                    <div class="preview-meta">
+                        <span>Duration: 4.2s</span>
+                        <span class="badge">English</span>
+                        <span>Whisper Large v3</span>
+                    </div>
+                </div>
+
+                <div class="float-element float-hotkey">Ctrl + Shift + S</div>
+                <div class="float-element float-accuracy">$0.002 this session</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cost Comparison Section -->
+    <section class="cost-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>Save Hundreds Per Year</h2>
+                <p>With STTpro you use your own OpenAI API key. You pay OpenAI directly &mdash; just fractions of a cent per transcription. No middleman markup, no recurring fees.</p>
+            </div>
+
+            <div class="cost-comparison">
+                <div class="cost-card competitor">
+                    <div class="cost-card-header">
+                        <span class="cost-label">Typical Competitor</span>
+                        <span class="cost-type">Monthly subscription</span>
+                    </div>
+                    <div class="cost-price">
+                        <span class="cost-amount">$10&ndash;$25</span>
+                        <span class="cost-period">/month</span>
+                    </div>
+                    <div class="cost-annual">$120&ndash;$300 /year</div>
+                    <ul class="cost-details">
+                        <li class="negative">Recurring monthly fee</li>
+                        <li class="negative">Usage limits &amp; caps</li>
+                        <li class="negative">Price increases over time</li>
+                        <li class="negative">Locked into their platform</li>
+                    </ul>
+                </div>
+
+                <div class="cost-vs">VS</div>
+
+                <div class="cost-card sttpro">
+                    <div class="cost-badge">Best Value</div>
+                    <div class="cost-card-header">
+                        <span class="cost-label">STTpro + Your API Key</span>
+                        <span class="cost-type">One-time + pay-per-use</span>
+                    </div>
+                    <div class="cost-price">
+                        <span class="cost-amount">~$1</span>
+                        <span class="cost-period">/month API cost</span>
+                    </div>
+                    <div class="cost-annual">~$12 /year + $15 one-time</div>
+                    <ul class="cost-details">
+                        <li class="positive">$15 one-time app purchase</li>
+                        <li class="positive">Pay only for what you use</li>
+                        <li class="positive">See costs in real-time in-app</li>
+                        <li class="positive">No limits, no caps, forever</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="savings-calculator">
+                <h3 class="calc-title">Calculate Your Savings</h3>
+                <p class="calc-subtitle">See how much you'd save compared to a typical subscription service.</p>
+
+                <div class="calc-input-row">
+                    <label for="calc-minutes">How many words do you dictate per day?</label>
+                    <div class="calc-slider-wrap">
+                        <input type="range" id="calc-minutes" min="500" max="10000" value="4000" step="500" class="calc-slider">
+                        <div class="calc-slider-value"><span id="calc-minutes-display">4,000</span> words/day</div>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem;">* Approximate estimate based on ~130 words per minute speaking rate</div>
+                </div>
+
+                <div class="calc-results">
+                    <div class="calc-result-col">
+                        <div class="calc-result-label">STTpro + API</div>
+                        <div class="calc-result-monthly" id="calc-sttpro-monthly">$5.54</div>
+                        <div class="calc-result-sub">/month</div>
+                        <div class="calc-result-yearly" id="calc-sttpro-yearly">$66.46/year + $15 license</div>
+                    </div>
+                    <div class="calc-result-vs">vs</div>
+                    <div class="calc-result-col competitor">
+                        <div class="calc-result-label">Typical Subscription</div>
+                        <div class="calc-result-monthly" id="calc-comp-monthly">$15.00</div>
+                        <div class="calc-result-sub">/month</div>
+                        <div class="calc-result-yearly" id="calc-comp-yearly">$180.00/year</div>
+                    </div>
+                </div>
+
+                <div class="calc-savings-banner" id="calc-savings-banner">
+                    <span class="calc-savings-amount">You save <strong id="calc-save-yearly">$98.54</strong> in the first year</span>
+                    <span class="calc-savings-pct" id="calc-save-pct">55% less</span>
+                </div>
+
+                <p class="savings-note">Whisper API costs $0.006/min. Competitor estimate based on average STT subscription pricing ($10&ndash;$25/mo). Your actual costs may vary.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>Everything You Need</h2>
+                <p>Professional speech-to-text packed into a lightweight Windows app that stays out of your way.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    </div>
+                    <h3>Bring Your Own API Key</h3>
+                    <p>Use your own OpenAI key and pay only for what you use. Typical cost: ~$0.006/min. Track your spending directly in the app &mdash; full cost transparency, zero surprises.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon green">
+                        <svg viewBox="0 0 24 24"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>
+                    </div>
+                    <h3>Global Hotkeys</h3>
+                    <p>Start and stop recording from any application with customizable keyboard shortcuts. No need to switch windows.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon purple">
+                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                    </div>
+                    <h3>Smart Prompts</h3>
+                    <p>GPT-powered post-processing can clean up, format, translate, or transform your transcriptions automatically.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon orange">
+                        <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                    </div>
+                    <h3>Transcript History</h3>
+                    <p>Every transcription is saved with timestamps, duration, language, and target window. Search and copy anytime.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon teal">
+                        <svg viewBox="0 0 24 24"><path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z"/></svg>
+                    </div>
+                    <h3>Silence Detection</h3>
+                    <p>Intelligent audio monitoring automatically detects when you stop speaking, so recordings stay clean and efficient.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon red">
+                        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    </div>
+                    <h3>Secure & Private</h3>
+                    <p>Your API key is stored locally with DPAPI encryption. Audio is sent directly to OpenAI and never stored on our servers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Three simple steps to start dictating in any application.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Press Your Hotkey</h3>
+                    <p>Hit your configured shortcut from any window to start recording. A visual indicator appears so you know it's listening.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Speak Naturally</h3>
+                    <p>Talk at your normal pace. STTpro captures high-quality audio and automatically detects when you pause.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Text Appears Instantly</h3>
+                    <p>Whisper AI transcribes your speech and the text is typed directly into whatever app has focus.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase -->
+    <section class="showcase">
+        <div class="section-container">
+            <div class="showcase-grid">
+                <div class="showcase-content">
+                    <h2>Works Everywhere You Type</h2>
+                    <p>STTpro types your transcribed text directly into any application. No copy-paste needed &mdash; just speak and it appears.</p>
+                    <ul class="showcase-list">
+                        <li>
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            Web browsers &amp; email clients
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            Code editors &amp; IDEs
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            Microsoft Office &amp; Google Docs
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            Chat apps (Slack, Discord, Teams)
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            Any text field on Windows
+                        </li>
+                    </ul>
+                </div>
+                <div class="showcase-visual">
+                    <div class="hotkey-display">
+                        <span class="key">Ctrl</span>
+                        <span class="key-plus">+</span>
+                        <span class="key">Shift</span>
+                        <span class="key-plus">+</span>
+                        <span class="key">S</span>
+                    </div>
+                    <div class="output-box">
+                        <div class="label">Transcription Output</div>
+                        <p>"Meeting notes: The team agreed to push the release to next Friday. Action items include updating the documentation and running the full test suite before deployment."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        How does STTpro work?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            STTpro captures your microphone audio when you press a global hotkey, sends it to the Whisper AI API for transcription, and types the result directly into whatever application currently has focus. It works system-wide with any text field.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Do I need an OpenAI API key?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes, STTpro uses your own OpenAI API key for Whisper transcription. This means you only pay for what you use (typically fractions of a cent per transcription) with no subscription fees to us. Your key is stored securely with DPAPI encryption.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What languages are supported?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            STTpro supports 50+ languages through the Whisper API, including English, Spanish, French, German, Chinese, Japanese, Arabic, and many more. Language is detected automatically, or you can set a preferred language in settings.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Is my audio data private?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes. Audio is sent directly from your computer to OpenAI's API for transcription. We never see, store, or process your audio or transcriptions. Your API key is encrypted locally using Windows DPAPI.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        Does it work with any application?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes! STTpro types transcribed text into whatever application has focus using keyboard simulation. This works with browsers, editors, chat apps, email, Office apps, and any standard text input on Windows.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        What are Smart Prompts?
+                        <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Smart Prompts use GPT to post-process your transcription. You can set up prompts to clean up grammar, format as bullet points, translate to another language, summarize, or apply any custom transformation before the text is typed out.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="section-container">
+            <div class="cta-box">
+                <h2>Ready to Type with Your Voice?</h2>
+                <p>Download STTpro and start dictating in any application on Windows. Free trial included.</p>
+                <a href="download.html" class="btn btn-large">Download for Windows</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </div>
+                    STTpro
+                </a>
+                <p>Professional speech-to-text for Windows, powered by Whisper AI.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Documentation</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="account.html">My Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="refund.html">Refund Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 STTpro. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        // FAQ toggle
+        function toggleFaq(btn) {
+            const item = btn.parentElement;
+            item.classList.toggle('active');
+        }
+
+        // Waveform animation
+        (function() {
+            const waveform = document.getElementById('waveform');
+            const barCount = 40;
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                bar.style.animationDelay = (i * 0.05) + 's';
+                bar.style.height = (Math.random() * 40 + 8) + 'px';
+                waveform.appendChild(bar);
+            }
+        })();
+
+        // Typing animation
+        (function() {
+            const text = "The quarterly report shows a 23% increase in user engagement, with the mobile platform driving most of the growth across all regions.";
+            const el = document.getElementById('typed-text');
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    el.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+                    i++;
+                    setTimeout(type, 30 + Math.random() * 20);
+                } else {
+                    el.innerHTML = text + '<span class="cursor"></span>';
+                    setTimeout(() => { i = 0; el.innerHTML = '<span class="cursor"></span>'; setTimeout(type, 1000); }, 3000);
+                }
+            }
+            setTimeout(type, 1000);
+        })();
+
+        // Cost calculator
+        (function() {
+            const slider = document.getElementById('calc-minutes');
+            const display = document.getElementById('calc-minutes-display');
+            const sttproMonthly = document.getElementById('calc-sttpro-monthly');
+            const sttproYearly = document.getElementById('calc-sttpro-yearly');
+            const compMonthly = document.getElementById('calc-comp-monthly');
+            const compYearly = document.getElementById('calc-comp-yearly');
+            const saveYearly = document.getElementById('calc-save-yearly');
+            const savePct = document.getElementById('calc-save-pct');
+
+            const WHISPER_COST_PER_MIN = 0.006;
+            const LICENSE_COST = 15;
+            const COMP_MONTHLY = 15; // average competitor
+            const WORDS_PER_MIN = 130; // approximate speaking rate
+
+            function updateCalc() {
+                const wordsPerDay = parseInt(slider.value);
+                display.textContent = wordsPerDay.toLocaleString();
+
+                // Convert words to minutes
+                const minPerDay = wordsPerDay / WORDS_PER_MIN;
+                const monthlyMinutes = minPerDay * 30;
+                const apiMonthly = monthlyMinutes * WHISPER_COST_PER_MIN;
+                const apiYearly = apiMonthly * 12;
+                const sttproFirstYear = apiYearly + LICENSE_COST;
+                const compYearlyTotal = COMP_MONTHLY * 12;
+                const saved = compYearlyTotal - sttproFirstYear;
+                const pct = Math.round((saved / compYearlyTotal) * 100);
+
+                sttproMonthly.textContent = '$' + apiMonthly.toFixed(2);
+                sttproYearly.textContent = '$' + apiYearly.toFixed(2) + '/year + $' + LICENSE_COST + ' license';
+                compMonthly.textContent = '$' + COMP_MONTHLY.toFixed(2);
+                compYearly.textContent = '$' + compYearlyTotal.toFixed(2) + '/year';
+                saveYearly.textContent = '$' + saved.toFixed(2);
+                savePct.textContent = pct + '% less';
+
+                // Update slider track fill
+                const pctSlider = ((wordsPerDay - 500) / (10000 - 500)) * 100;
+                slider.style.background = 'linear-gradient(to right, var(--primary) ' + pctSlider + '%, var(--border-light) ' + pctSlider + '%)';
+            }
+
+            slider.addEventListener('input', updateCalc);
+            updateCalc();
+        })();
+    </script>
+</body>
+</html>

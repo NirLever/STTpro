@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>Documentation - STTpro | User Guide & Setup</title>
+    <meta name="description" content="Complete documentation for STTpro speech-to-text app. Installation guide, API key setup, hotkeys, smart prompts, troubleshooting, and more.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <meta name="theme-color" content="#007AFF">
+
+    <!-- Fonts & Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ============ Docs Layout ============ */
+        .docs-wrapper {
+            display: flex;
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* ============ Sidebar ============ */
+        .docs-sidebar {
+            width: 280px;
+            min-width: 280px;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .docs-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .docs-sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .sidebar-search {
+            padding: 0 1.25rem 1.25rem;
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            padding: 0.6rem 0.9rem 0.6rem 2.4rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .sidebar-search input:focus {
+            border-color: var(--primary);
+        }
+
+        .sidebar-search-wrap {
+            position: relative;
+        }
+
+        .sidebar-search-wrap svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            fill: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .sidebar-category {
+            padding: 0.5rem 1.25rem 0.25rem;
+        }
+
+        .sidebar-category-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            padding: 0.5rem 0 0.35rem;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 0.4rem 0.75rem;
+            margin: 1px 0;
+            font-size: 0.87rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.15s;
+            font-weight: 450;
+        }
+
+        .sidebar-link:hover {
+            color: var(--primary);
+            background: rgba(0, 122, 255, 0.06);
+        }
+
+        .sidebar-link.active {
+            color: var(--primary);
+            background: rgba(0, 122, 255, 0.1);
+            font-weight: 600;
+        }
+
+        .sidebar-link.hidden {
+            display: none;
+        }
+
+        .sidebar-category.hidden {
+            display: none;
+        }
+
+        /* ============ Mobile sidebar toggle ============ */
+        .docs-sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 200;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35);
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .docs-sidebar-toggle:hover {
+            transform: scale(1.08);
+        }
+
+        .docs-sidebar-toggle svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        .docs-sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 99;
+        }
+
+        /* ============ Main content ============ */
+        .docs-main {
+            margin-left: 280px;
+            flex: 1;
+            min-width: 0;
+            padding: 2.5rem 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .docs-main h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .docs-main .docs-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .docs-section {
+            margin-bottom: 3.5rem;
+            scroll-margin-top: 80px;
+        }
+
+        .docs-section h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .docs-section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-primary);
+        }
+
+        .docs-section p {
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-bottom: 0.85rem;
+            font-size: 0.95rem;
+        }
+
+        .docs-section ul,
+        .docs-section ol {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .docs-section li {
+            margin-bottom: 0.3rem;
+        }
+
+        .docs-section code {
+            background: rgba(0, 122, 255, 0.07);
+            color: var(--primary-dark);
+            padding: 0.15rem 0.45rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+        }
+
+        .docs-section pre {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 1.15rem 1.4rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.65;
+        }
+
+        .docs-section pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        /* Info / tip / warning boxes */
+        .docs-callout {
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.65;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .docs-callout svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .docs-callout.info {
+            background: rgba(0, 122, 255, 0.06);
+            border: 1px solid rgba(0, 122, 255, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .docs-callout.info svg {
+            fill: var(--primary);
+        }
+
+        .docs-callout.tip {
+            background: rgba(52, 199, 89, 0.06);
+            border: 1px solid rgba(52, 199, 89, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .docs-callout.tip svg {
+            fill: var(--secondary);
+        }
+
+        .docs-callout.warning {
+            background: rgba(255, 149, 0, 0.06);
+            border: 1px solid rgba(255, 149, 0, 0.18);
+            color: var(--text-secondary);
+        }
+
+        .docs-callout.warning svg {
+            fill: #FF9500;
+        }
+
+        /* Shortcuts table */
+        .docs-table-wrap {
+            overflow-x: auto;
+            margin-bottom: 1.25rem;
+        }
+
+        .docs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .docs-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .docs-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .docs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .docs-table tr:hover td {
+            background: rgba(0, 122, 255, 0.03);
+        }
+
+        .docs-table kbd {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            box-shadow: 0 1px 0 var(--border);
+        }
+
+        /* Steps with numbers */
+        .docs-steps {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .docs-steps li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .docs-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0.1rem;
+            width: 1.6rem;
+            height: 1.6rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 1000px) {
+            .docs-main {
+                padding: 2rem 2rem 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .docs-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .docs-sidebar.open {
+                transform: translateX(0);
+                box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            }
+
+            .docs-sidebar-overlay.open {
+                display: block;
+            }
+
+            .docs-sidebar-toggle {
+                display: flex;
+            }
+
+            .docs-main {
+                margin-left: 0;
+                padding: 1.75rem 1.25rem 3rem;
+            }
+
+            .docs-main h1 {
+                font-size: 1.75rem;
+            }
+
+            .docs-section h2 {
+                font-size: 1.35rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                STTpro
+            </a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Docs</a>
+                <a href="account.html">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="docs-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Docs Layout -->
+    <div class="docs-wrapper">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar" id="docsSidebar">
+            <div class="sidebar-search">
+                <div class="sidebar-search-wrap">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="sidebarSearch" placeholder="Search docs..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="sidebar-category" data-category="getting-started">
+                <div class="sidebar-category-title">Getting Started</div>
+                <a href="#installation" class="sidebar-link" data-section="installation">Installation</a>
+                <a href="#api-key-setup" class="sidebar-link" data-section="api-key-setup">API Key Setup</a>
+                <a href="#first-transcription" class="sidebar-link" data-section="first-transcription">First Transcription</a>
+            </div>
+
+            <div class="sidebar-category" data-category="features">
+                <div class="sidebar-category-title">Features</div>
+                <a href="#global-hotkeys" class="sidebar-link" data-section="global-hotkeys">Global Hotkeys</a>
+                <a href="#smart-prompts" class="sidebar-link" data-section="smart-prompts">Smart Prompts</a>
+                <a href="#transcript-history" class="sidebar-link" data-section="transcript-history">Transcript History</a>
+                <a href="#silence-detection" class="sidebar-link" data-section="silence-detection">Silence Detection</a>
+            </div>
+
+            <div class="sidebar-category" data-category="configuration">
+                <div class="sidebar-category-title">Configuration</div>
+                <a href="#settings" class="sidebar-link" data-section="settings">Settings</a>
+                <a href="#audio-devices" class="sidebar-link" data-section="audio-devices">Audio Devices</a>
+                <a href="#keyboard-shortcuts" class="sidebar-link" data-section="keyboard-shortcuts">Keyboard Shortcuts</a>
+            </div>
+
+            <div class="sidebar-category" data-category="help">
+                <div class="sidebar-category-title">Help</div>
+                <a href="#troubleshooting" class="sidebar-link" data-section="troubleshooting">Troubleshooting</a>
+                <a href="#faq" class="sidebar-link" data-section="faq">FAQ</a>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="docs-main">
+            <h1>Documentation</h1>
+            <p class="docs-subtitle">Everything you need to get started with STTpro and make the most of its features.</p>
+
+            <!-- ==================== GETTING STARTED ==================== -->
+
+            <section class="docs-section" id="installation">
+                <h2>Installation</h2>
+                <p>STTpro runs on Windows 10 (version 1903 or later) and Windows 11. It requires the .NET 8 Desktop Runtime, which the installer will offer to set up automatically if it is not already present.</p>
+
+                <h3>System Requirements</h3>
+                <ul>
+                    <li>Windows 10 version 1903+ or Windows 11</li>
+                    <li>.NET 8 Desktop Runtime</li>
+                    <li>A working microphone</li>
+                    <li>An internet connection (for API calls)</li>
+                    <li>Approximately 30 MB of disk space</li>
+                </ul>
+
+                <h3>Install Steps</h3>
+                <ol class="docs-steps">
+                    <li>Download the latest installer from the <a href="download.html">Download</a> page.</li>
+                    <li>Run <code>STTpro-Setup.exe</code> and follow the on-screen prompts. The installer will place STTpro in your <code>AppData\Local\STTpro</code> folder by default.</li>
+                    <li>When installation completes, STTpro launches and appears in your system tray (bottom-right of the taskbar).</li>
+                    <li>On first launch you will be prompted to enter your OpenAI API key. See the next section for details.</li>
+                </ol>
+
+                <div class="docs-callout tip">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>STTpro can be configured to start automatically with Windows. You can enable this in <strong>Settings &gt; General &gt; Start with Windows</strong>.</span>
+                </div>
+            </section>
+
+            <section class="docs-section" id="api-key-setup">
+                <h2>API Key Setup</h2>
+                <p>STTpro uses your own OpenAI API key for Whisper transcription and, optionally, GPT-powered Smart Prompts. You only pay OpenAI for what you use -- there are no additional API fees from STTpro.</p>
+
+                <h3>Getting an OpenAI API Key</h3>
+                <ol class="docs-steps">
+                    <li>Visit <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> and create an account (or sign in if you already have one).</li>
+                    <li>Navigate to <strong>API Keys</strong> in the left sidebar of the OpenAI dashboard.</li>
+                    <li>Click <strong>Create new secret key</strong>, give it a name like "STTpro", and copy the key.</li>
+                    <li>Back in STTpro, open <strong>Settings</strong> and paste the key into the <strong>OpenAI API Key</strong> field.</li>
+                </ol>
+
+                <div class="docs-callout info">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>Your API key is stored locally on your machine using Windows DPAPI encryption. It is never sent to STTpro servers.</span>
+                </div>
+
+                <h3>Estimated API Costs</h3>
+                <p>Whisper API pricing is based on audio duration. As of early 2026, the cost is roughly <strong>$0.006 per minute</strong> of audio. A typical 15-second dictation costs a fraction of a cent. Check <a href="https://openai.com/pricing" target="_blank" rel="noopener">OpenAI's pricing page</a> for current rates.</p>
+
+                <h3>Verifying Your Key</h3>
+                <p>After entering your key, click the <strong>Test Connection</strong> button in Settings. STTpro will make a small test request. If you see a green checkmark, everything is working. If the test fails, double-check that:</p>
+                <ul>
+                    <li>The key was copied completely (no trailing spaces)</li>
+                    <li>Your OpenAI account has billing enabled with available credits</li>
+                    <li>Your firewall is not blocking outbound HTTPS requests</li>
+                </ul>
+            </section>
+
+            <section class="docs-section" id="first-transcription">
+                <h2>Your First Transcription</h2>
+                <p>Once your API key is configured, you are ready to start dictating.</p>
+
+                <ol class="docs-steps">
+                    <li>Open any application with a text field -- a browser, Notepad, Word, or a chat window.</li>
+                    <li>Click into the text field so it has focus.</li>
+                    <li>Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> (the default hotkey) to start recording. You will see a small visual indicator confirming that STTpro is listening.</li>
+                    <li>Speak naturally into your microphone. When you are finished, press the same hotkey again to stop, or simply wait -- silence detection will stop the recording automatically.</li>
+                    <li>After a brief moment, your transcribed text will be typed into the focused text field.</li>
+                </ol>
+
+                <div class="docs-callout tip">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>If no text appears, make sure your microphone is selected correctly in <strong>Settings &gt; Audio Device</strong> and that your API key is valid.</span>
+                </div>
+            </section>
+
+            <!-- ==================== FEATURES ==================== -->
+
+            <section class="docs-section" id="global-hotkeys">
+                <h2>Global Hotkeys</h2>
+                <p>STTpro registers system-wide keyboard shortcuts so you can start and stop recording from any application without switching windows.</p>
+
+                <h3>How It Works</h3>
+                <p>When you press your recording hotkey, STTpro begins capturing audio from your selected microphone. The hotkey works even when STTpro's window is minimized or hidden in the system tray. A visual overlay briefly appears to confirm the recording has started.</p>
+
+                <h3>Customizing Hotkeys</h3>
+                <p>You can change all hotkeys in <strong>Settings &gt; Keyboard Shortcuts</strong>. Click the shortcut field next to any action, then press your desired key combination. STTpro supports combinations using <kbd>Ctrl</kbd>, <kbd>Shift</kbd>, <kbd>Alt</kbd>, and <kbd>Win</kbd> modifiers.</p>
+
+                <div class="docs-callout warning">
+                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                    <span>Avoid hotkeys already used by Windows or other applications. If a conflict is detected, STTpro will warn you when saving.</span>
+                </div>
+            </section>
+
+            <section class="docs-section" id="smart-prompts">
+                <h2>Smart Prompts</h2>
+                <p>Smart Prompts let you post-process transcriptions using GPT before the text is typed out. This is useful for cleaning up grammar, reformatting text, translating, or applying custom transformations.</p>
+
+                <h3>Setting Up a Smart Prompt</h3>
+                <ol class="docs-steps">
+                    <li>Open <strong>Settings &gt; Smart Prompts</strong>.</li>
+                    <li>Click <strong>Add Prompt</strong> to create a new prompt profile.</li>
+                    <li>Give the prompt a name (e.g., "Clean Grammar" or "Translate to Spanish").</li>
+                    <li>Write the instruction in the prompt field. For example: <code>Fix any grammar or spelling errors. Keep the same tone and meaning.</code></li>
+                    <li>Optionally, assign a dedicated hotkey to this prompt so you can trigger it directly.</li>
+                </ol>
+
+                <h3>Example Prompts</h3>
+                <ul>
+                    <li><strong>Grammar cleanup:</strong> <code>Fix grammar and spelling errors without changing the meaning.</code></li>
+                    <li><strong>Bullet points:</strong> <code>Reformat this text as a concise bulleted list.</code></li>
+                    <li><strong>Translation:</strong> <code>Translate the following text to French.</code></li>
+                    <li><strong>Email tone:</strong> <code>Rewrite this as a professional email, keeping it concise.</code></li>
+                    <li><strong>Summary:</strong> <code>Summarize this text in one or two sentences.</code></li>
+                </ul>
+
+                <div class="docs-callout info">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>Smart Prompts require a GPT-capable model on your OpenAI account. The prompt processing adds a small amount of latency and cost per use.</span>
+                </div>
+            </section>
+
+            <section class="docs-section" id="transcript-history">
+                <h2>Transcript History</h2>
+                <p>Every transcription you make is saved locally so you can review, search, and copy past results at any time.</p>
+
+                <h3>Viewing History</h3>
+                <p>Open the STTpro main window and click the <strong>History</strong> tab. Each entry shows:</p>
+                <ul>
+                    <li>The full transcribed text</li>
+                    <li>Timestamp (date and time)</li>
+                    <li>Recording duration</li>
+                    <li>Detected language</li>
+                    <li>The target application window title</li>
+                </ul>
+
+                <h3>Searching and Copying</h3>
+                <p>Use the search bar at the top of the History panel to filter entries by keyword. Click any entry to select it, then use the <strong>Copy</strong> button or press <kbd>Ctrl</kbd> + <kbd>C</kbd> to copy the text to your clipboard.</p>
+
+                <h3>Managing History</h3>
+                <p>You can delete individual entries by selecting them and pressing <kbd>Delete</kbd>, or clear all history from <strong>Settings &gt; History &gt; Clear All</strong>. History is stored locally in your AppData folder.</p>
+            </section>
+
+            <section class="docs-section" id="silence-detection">
+                <h2>Silence Detection</h2>
+                <p>STTpro continuously monitors audio levels during recording. When it detects that you have stopped speaking for a configurable period, it automatically ends the recording and sends the audio for transcription.</p>
+
+                <h3>Configuration</h3>
+                <ul>
+                    <li><strong>Silence Threshold:</strong> The volume level (in dB) below which audio is considered silence. Lower values are more sensitive. Default: <code>-40 dB</code>.</li>
+                    <li><strong>Silence Duration:</strong> How long silence must persist before recording stops automatically. Default: <code>2.0 seconds</code>.</li>
+                    <li><strong>Enable/Disable:</strong> You can turn silence detection off entirely if you prefer to always stop recording manually with the hotkey.</li>
+                </ul>
+
+                <div class="docs-callout tip">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <span>If silence detection triggers too early in a noisy environment, try lowering the threshold (e.g., <code>-50 dB</code>) or increasing the duration to <code>3.0 seconds</code>.</span>
+                </div>
+            </section>
+
+            <!-- ==================== CONFIGURATION ==================== -->
+
+            <section class="docs-section" id="settings">
+                <h2>Settings</h2>
+                <p>The Settings panel is accessible from the system tray icon or the main window. Below is an overview of all configurable options.</p>
+
+                <h3>General</h3>
+                <ul>
+                    <li><strong>Start with Windows:</strong> Launch STTpro automatically when you sign in.</li>
+                    <li><strong>Start minimized:</strong> Launch directly to the system tray without showing the main window.</li>
+                    <li><strong>Notification sounds:</strong> Play a short sound when recording starts and stops.</li>
+                    <li><strong>Visual overlay:</strong> Show a small on-screen indicator while recording.</li>
+                </ul>
+
+                <h3>Transcription</h3>
+                <ul>
+                    <li><strong>Language:</strong> Set a preferred language or leave on <code>Auto</code> for automatic detection.</li>
+                    <li><strong>Model:</strong> Choose the Whisper model variant. <code>whisper-1</code> is the default and recommended option.</li>
+                    <li><strong>Temperature:</strong> Controls transcription creativity/variation. Default <code>0</code> produces the most deterministic results.</li>
+                </ul>
+
+                <h3>Output</h3>
+                <ul>
+                    <li><strong>Auto-paste mode:</strong> Choose between simulating keystrokes (default) or pasting from clipboard.</li>
+                    <li><strong>Append newline:</strong> Automatically add a newline after each transcription.</li>
+                    <li><strong>Typing speed:</strong> Adjust the delay between simulated keystrokes. Increase this if characters are dropped in some applications.</li>
+                </ul>
+
+                <h3>Privacy</h3>
+                <ul>
+                    <li><strong>API Key:</strong> Enter or update your OpenAI API key.</li>
+                    <li><strong>Clear history on exit:</strong> Automatically delete all transcript history when STTpro closes.</li>
+                </ul>
+            </section>
+
+            <section class="docs-section" id="audio-devices">
+                <h2>Audio Devices</h2>
+                <p>STTpro can record from any audio input device connected to your computer.</p>
+
+                <h3>Selecting a Microphone</h3>
+                <p>Go to <strong>Settings &gt; Audio Device</strong> to see a dropdown list of all available input devices. Select the microphone you want to use. The default option uses whatever Windows has set as the default recording device.</p>
+
+                <h3>Testing Your Microphone</h3>
+                <p>Click the <strong>Test</strong> button next to the device selector. STTpro will briefly record from the selected device and display the audio level meter. If you see the meter responding to your voice, the device is working correctly.</p>
+
+                <div class="docs-callout info">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>If you connect or disconnect a microphone while STTpro is running, click <strong>Refresh</strong> to update the device list.</span>
+                </div>
+
+                <h3>Tips for Best Results</h3>
+                <ul>
+                    <li>Use a dedicated microphone rather than a built-in laptop mic for better clarity.</li>
+                    <li>Position the microphone 6-12 inches from your mouth.</li>
+                    <li>Reduce background noise where possible -- Whisper handles some noise well, but a quieter environment produces better accuracy.</li>
+                    <li>Check your Windows Sound settings to make sure the correct device is set and the input level is adequate.</li>
+                </ul>
+            </section>
+
+            <section class="docs-section" id="keyboard-shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+                <p>The following table lists all default keyboard shortcuts. Every shortcut can be customized in <strong>Settings &gt; Keyboard Shortcuts</strong>.</p>
+
+                <div class="docs-table-wrap">
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Default Shortcut</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Start / Stop Recording</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd></td>
+                                <td>Toggle audio recording on and off</td>
+                            </tr>
+                            <tr>
+                                <td>Cancel Recording</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd></td>
+                                <td>Stop recording and discard the audio without transcribing</td>
+                            </tr>
+                            <tr>
+                                <td>Record with Smart Prompt</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd></td>
+                                <td>Start recording using the active Smart Prompt for post-processing</td>
+                            </tr>
+                            <tr>
+                                <td>Open STTpro Window</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>W</kbd></td>
+                                <td>Bring the main STTpro window to the foreground</td>
+                            </tr>
+                            <tr>
+                                <td>Open History</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd></td>
+                                <td>Open the transcript history panel</td>
+                            </tr>
+                            <tr>
+                                <td>Cycle Smart Prompt</td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></td>
+                                <td>Switch to the next Smart Prompt profile</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="docs-callout info">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>All shortcuts are global -- they work from any application, even when STTpro is in the system tray.</span>
+                </div>
+            </section>
+
+            <!-- ==================== HELP ==================== -->
+
+            <section class="docs-section" id="troubleshooting">
+                <h2>Troubleshooting</h2>
+                <p>If something is not working as expected, check the common issues below.</p>
+
+                <h3>No text appears after recording</h3>
+                <ul>
+                    <li>Verify your API key is valid by running <strong>Settings &gt; Test Connection</strong>.</li>
+                    <li>Make sure a text field has focus before you stop recording. STTpro types into whichever window is active.</li>
+                    <li>Check your internet connection -- Whisper requires an API call to OpenAI servers.</li>
+                    <li>Review the <strong>History</strong> tab. If the transcription appears there but not in your app, the issue is with text insertion. Try switching to clipboard paste mode in <strong>Settings &gt; Output &gt; Auto-paste mode</strong>.</li>
+                </ul>
+
+                <h3>Recording does not start</h3>
+                <ul>
+                    <li>Confirm your hotkey is not conflicting with another application. Try changing it temporarily in Settings.</li>
+                    <li>Make sure STTpro is running -- check for its icon in the system tray.</li>
+                    <li>On some systems, running STTpro as administrator may be required for global hotkeys to work in elevated windows.</li>
+                </ul>
+
+                <h3>Microphone not detected</h3>
+                <ul>
+                    <li>Open <strong>Windows Settings &gt; System &gt; Sound</strong> and verify your mic appears under Input devices.</li>
+                    <li>Make sure no other application has exclusive control of the microphone.</li>
+                    <li>Click <strong>Refresh</strong> in STTpro's audio device settings after plugging in a new device.</li>
+                </ul>
+
+                <h3>Poor transcription accuracy</h3>
+                <ul>
+                    <li>Use a higher-quality microphone and reduce background noise.</li>
+                    <li>Speak clearly and at a moderate pace.</li>
+                    <li>If you primarily speak a language other than English, set the correct language in <strong>Settings &gt; Transcription &gt; Language</strong> instead of using auto-detect.</li>
+                    <li>Check that the silence detection threshold is not cutting off your speech early.</li>
+                </ul>
+
+                <h3>High latency</h3>
+                <ul>
+                    <li>Transcription speed depends on your internet connection and the OpenAI API response time.</li>
+                    <li>Shorter recordings are transcribed faster. If silence detection is disabled, consider enabling it to send smaller audio chunks.</li>
+                    <li>Smart Prompts add an additional API call. Disable them if you need minimum latency.</li>
+                </ul>
+
+                <h3>Characters are dropped or garbled when typing</h3>
+                <ul>
+                    <li>Some applications process keyboard input slowly. Increase the <strong>Typing speed</strong> delay in <strong>Settings &gt; Output</strong>.</li>
+                    <li>Alternatively, switch to <strong>Clipboard paste mode</strong> which pastes the entire text at once.</li>
+                </ul>
+            </section>
+
+            <section class="docs-section" id="faq">
+                <h2>Frequently Asked Questions</h2>
+
+                <h3>Is STTpro free?</h3>
+                <p>STTpro offers a free trial with a limited number of transcriptions. After the trial, a one-time license purchase unlocks unlimited use. You also pay OpenAI directly for API usage, which is typically very low cost. Visit the <a href="buy.html">Buy</a> page for pricing details.</p>
+
+                <h3>Does STTpro work offline?</h3>
+                <p>No. STTpro requires an internet connection to send audio to the OpenAI Whisper API for transcription. There is no local transcription mode at this time.</p>
+
+                <h3>What data does STTpro collect?</h3>
+                <p>STTpro does not collect or transmit your audio, transcriptions, or personal data to our servers. Audio goes directly from your machine to OpenAI's API. License validation requires only your license key. Read our <a href="privacy.html">Privacy Policy</a> for full details.</p>
+
+                <h3>Can I use a different transcription provider?</h3>
+                <p>Currently STTpro is built around the OpenAI Whisper API. Support for additional providers may be added in future updates.</p>
+
+                <h3>Does it work with multiple monitors?</h3>
+                <p>Yes. The recording overlay and all functionality work across multiple monitors. STTpro types into whichever text field has focus, regardless of which monitor it is on.</p>
+
+                <h3>How do I update STTpro?</h3>
+                <p>STTpro checks for updates automatically on launch. When an update is available, you will see a notification with the option to download and install it. You can also check manually from <strong>Settings &gt; About &gt; Check for Updates</strong>.</p>
+
+                <h3>How do I uninstall STTpro?</h3>
+                <p>Open <strong>Windows Settings &gt; Apps &gt; Installed apps</strong>, find STTpro in the list, and click <strong>Uninstall</strong>. This removes the application and its shortcuts. Your transcript history and settings in AppData are preserved unless you manually delete them.</p>
+
+                <h3>I need more help. How do I get support?</h3>
+                <p>If your issue is not covered here, reach out via email at <a href="mailto:support@sttpro.com">support@sttpro.com</a>. Include your STTpro version number (found in <strong>Settings &gt; About</strong>) and a description of the problem.</p>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Mobile sidebar toggle button -->
+    <button class="docs-sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle documentation menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </div>
+                    STTpro
+                </a>
+                <p>Professional speech-to-text for Windows, powered by Whisper AI.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Documentation</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="account.html">My Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="refund.html">Refund Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 STTpro. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle (top nav)
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        // Sidebar mobile toggle
+        function toggleSidebar() {
+            document.getElementById('docsSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('docsSidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
+
+        // Sidebar search filtering
+        (function() {
+            const searchInput = document.getElementById('sidebarSearch');
+            const links = document.querySelectorAll('.sidebar-link');
+            const categories = document.querySelectorAll('.sidebar-category');
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+
+                categories.forEach(cat => {
+                    let hasVisible = false;
+                    const catLinks = cat.querySelectorAll('.sidebar-link');
+                    catLinks.forEach(link => {
+                        const text = link.textContent.toLowerCase();
+                        const sectionId = link.getAttribute('data-section');
+                        const section = sectionId ? document.getElementById(sectionId) : null;
+                        const sectionText = section ? section.textContent.toLowerCase() : '';
+
+                        if (!query || text.includes(query) || sectionText.includes(query)) {
+                            link.classList.remove('hidden');
+                            hasVisible = true;
+                        } else {
+                            link.classList.add('hidden');
+                        }
+                    });
+                    if (!query || hasVisible) {
+                        cat.classList.remove('hidden');
+                    } else {
+                        cat.classList.add('hidden');
+                    }
+                });
+            });
+        })();
+
+        // Active sidebar link on scroll
+        (function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const sections = [];
+
+            sidebarLinks.forEach(link => {
+                const id = link.getAttribute('data-section');
+                if (id) {
+                    const el = document.getElementById(id);
+                    if (el) sections.push({ id: id, el: el, link: link });
+                }
+            });
+
+            function updateActive() {
+                let current = null;
+                const scrollY = window.scrollY + 100;
+
+                for (let i = sections.length - 1; i >= 0; i--) {
+                    if (sections[i].el.offsetTop <= scrollY) {
+                        current = sections[i];
+                        break;
+                    }
+                }
+
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                if (current) {
+                    current.link.classList.add('active');
+                }
+            }
+
+            window.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+
+            // Also set active on click
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    // Close sidebar on mobile after clicking a link
+                    closeSidebar();
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

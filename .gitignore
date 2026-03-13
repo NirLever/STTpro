@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.vs/
+.vs/
+
+## IDE
+.idea/
+*.sln.DotSettings.user
+
+## Build
+publish/
+out/
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store

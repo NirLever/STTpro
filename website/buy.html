@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy STTpro - $15 One-Time Purchase | Bring Your Own API Key</title>
+    <meta name="description" content="Buy STTpro for $15 one-time. Bring your own OpenAI API key and pay only for what you use. No subscription, no monthly fees. Save up to 96% vs competitors.">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <meta name="theme-color" content="#007AFF">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .buy-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 7rem 2rem 4rem;
+            background: var(--bg-primary);
+        }
+
+        .buy-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .buy-card h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .buy-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Price box */
+        .price-box {
+            background: linear-gradient(135deg, var(--primary), #5856D6);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .price-box .price {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-box .price-note {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        /* Features list */
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .features-list li svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--secondary);
+            flex-shrink: 0;
+        }
+
+        /* Cost estimate */
+        .cost-estimate {
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .cost-estimate-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .cost-estimate-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cost-estimate-table td {
+            padding: 0.4rem 0;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .cost-estimate-table .cost-val {
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cost-estimate-table .cost-total {
+            border-top: 1px solid var(--border);
+        }
+
+        .cost-estimate-table .cost-total td {
+            padding-top: 0.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .cost-val.highlight {
+            color: var(--secondary) !important;
+            font-size: 1rem;
+        }
+
+        .cost-val.strikethrough {
+            text-decoration: line-through;
+            color: var(--text-muted) !important;
+            font-weight: 400;
+        }
+
+        /* Machine ID info box */
+        .machine-info {
+            background: var(--bg-input);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .machine-info svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .machine-info p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* Buy button */
+        .buy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .buy-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3);
+        }
+
+        .buy-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Secure note */
+        .secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .secure-note svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--text-muted);
+        }
+
+        @media (max-width: 600px) {
+            .buy-page {
+                padding: 5rem 1.25rem 3rem;
+            }
+
+            .buy-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .buy-card h1 {
+                font-size: 1.75rem;
+            }
+
+            .price-box .price {
+                font-size: 2.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                STTpro
+            </a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Docs</a>
+                <a href="account.html">Account</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Buy Section -->
+    <section class="buy-page">
+        <div class="buy-card">
+            <h1>Buy STTpro</h1>
+            <p class="buy-subtitle">One-time purchase. Bring your own API key. No subscription ever.</p>
+
+            <div class="price-box">
+                <div class="price">$15</div>
+                <div class="price-note">one-time purchase &mdash; yours forever</div>
+            </div>
+
+            <div class="cost-estimate">
+                <div class="cost-estimate-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--primary)"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                    <strong>Your estimated total cost</strong>
+                </div>
+                <table class="cost-estimate-table">
+                    <tr>
+                        <td>STTpro license</td>
+                        <td class="cost-val">$15 once</td>
+                    </tr>
+                    <tr>
+                        <td>API cost (~30 min/day)</td>
+                        <td class="cost-val">~$1/month</td>
+                    </tr>
+                    <tr class="cost-total">
+                        <td>First year total</td>
+                        <td class="cost-val highlight">~$27</td>
+                    </tr>
+                    <tr>
+                        <td>Competitor subscription</td>
+                        <td class="cost-val strikethrough">$120&ndash;$300/year</td>
+                    </tr>
+                </table>
+            </div>
+
+            <ul class="features-list">
+                <li>
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Bring your own OpenAI API key
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Track API costs in real-time in the app
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Lifetime updates, all features unlocked
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    30-day money-back guarantee
+                </li>
+            </ul>
+
+            <div class="machine-info">
+                <svg viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+                <p>Your license is tied to your machine ID. After purchase, enter your license key in the STTpro app to activate. You can find your machine ID in the app settings.</p>
+            </div>
+
+            <a href="#" class="buy-btn">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                Buy Now
+            </a>
+
+            <div class="secure-note">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                Secure payment processing
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </div>
+                    STTpro
+                </a>
+                <p>Professional speech-to-text for Windows, powered by Whisper AI.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="download.html">Download</a>
+                <a href="buy.html">Buy</a>
+                <a href="docs.html">Documentation</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="account.html">My Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
+                <a href="refund.html">Refund Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 STTpro. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.querySelector('.hamburger').classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<Window x:Class="STTpro.App.Views.RecordingBorderOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        IsHitTestVisible="False">
+    <Grid>
+        <!-- Subtle red glow border -->
+        <Border x:Name="GlowBorder"
+                BorderThickness="2"
+                CornerRadius="6"
+                BorderBrush="#50FF3B30">
+            <Border.Effect>
+                <DropShadowEffect Color="#FFFF3B30" BlurRadius="10" ShadowDepth="0" Opacity="0.35"/>
+            </Border.Effect>
+        </Border>
+        <Border BorderThickness="2" CornerRadius="6">
+            <Border.BorderBrush>
+                <SolidColorBrush x:Name="PulseBrush" Color="#40FF3B30"/>
+            </Border.BorderBrush>
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever">
+                            <ColorAnimation
+                                Storyboard.TargetName="PulseBrush"
+                                Storyboard.TargetProperty="Color"
+                                From="#40FF3B30" To="#15FF3B30"
+                                Duration="0:0:1.2"
+                                AutoReverse="True">
+                                <ColorAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseInOut"/>
+                                </ColorAnimation.EasingFunction>
+                            </ColorAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+        </Border>
+    </Grid>
+</Window>

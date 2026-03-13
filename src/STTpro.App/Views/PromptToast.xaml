@@ -1,0 +1,34 @@
+<Window x:Class="STTpro.App.Views.PromptToast"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        IsHitTestVisible="False">
+    <Border CornerRadius="8"
+            Background="#F0FFFFFF"
+            BorderBrush="#40000000"
+            BorderThickness="1"
+            Padding="16,10,16,10"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.25"/>
+        </Border.Effect>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <!-- Recording dot -->
+            <Ellipse Width="8" Height="8" Fill="#FFFF3B30" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock x:Name="ToastText"
+                       Text=""
+                       Foreground="#FF1D1D1F"
+                       FontSize="13"
+                       FontFamily="Segoe UI"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</Window>
