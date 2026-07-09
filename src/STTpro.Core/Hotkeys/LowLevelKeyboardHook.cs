@@ -81,10 +81,28 @@ public class LowLevelKeyboardHook : IDisposable
                 _isKeyDown = false;
                 KeyUp?.Invoke(this, EventArgs.Empty);
             }
+            // If a modifier key is released while we think the combo is held, fire release
+            // (covers the case where the target key-up was lost due to focus change etc.)
+            else if (_isKeyDown && IsModifierKey(hookStruct.vkCode) &&
+                     (msg == NativeMethods.WM_KEYUP || msg == NativeMethods.WM_SYSKEYUP) &&
+                     !IsTargetKeyPhysicallyDown())
+            {
+                _isKeyDown = false;
+                KeyUp?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         return NativeMethods.CallNextHookEx(_hookId, nCode, wParam, lParam);
     }
+
+    private static bool IsModifierKey(uint vkCode) =>
+        vkCode is 0x10 or 0x11 or 0x12   // VK_SHIFT, VK_CONTROL, VK_MENU
+              or 0xA0 or 0xA1             // VK_LSHIFT, VK_RSHIFT
+              or 0xA2 or 0xA3             // VK_LCONTROL, VK_RCONTROL
+              or 0xA4 or 0xA5;            // VK_LMENU, VK_RMENU
+
+    private bool IsTargetKeyPhysicallyDown() =>
+        (GetAsyncKeyState((int)_targetKeyCode) & 0x8000) != 0;
 
     private bool AreModifiersPressed()
     {

@@ -123,12 +123,20 @@ public class TextOutputService : ITextOutputService
         // Brief wait for the target app to process the paste before restoring clipboard
         await Task.Delay(150);
 
-        // Restore clipboard
-        if (_restoreClipboard && previousText != null)
+        // Restore clipboard. If there was previous text, restore it.
+        // Otherwise (empty clipboard or non-text content), clear the clipboard
+        // so the transcript doesn't linger there.
+        if (_restoreClipboard)
         {
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                try { Clipboard.SetText(previousText); }
+                try
+                {
+                    if (previousText != null)
+                        Clipboard.SetText(previousText);
+                    else
+                        Clipboard.Clear();
+                }
                 catch { }
             });
         }

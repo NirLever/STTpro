@@ -58,11 +58,23 @@ public class WhisperApiProvider : ISttProvider
 
         var result = JsonSerializer.Deserialize<WhisperResponse>(json, JsonOptions);
 
-        // Extract max no_speech_prob across all segments
+        // Compute duration-weighted average no_speech_prob across segments.
+        // Using Max caused valid long chunks to be rejected when a short
+        // trailing segment had high silence probability. Using Min would be
+        // too permissive on hallucinations. Weighted-average is the right
+        // middle ground: dominated by the bulk of the audio.
         double noSpeechProb = 0;
-        if (result?.Segments is { Count: > 0 })
+        if (result?.Segments is { Count: > 0 } segs)
         {
-            noSpeechProb = result.Segments.Max(s => s.NoSpeechProb);
+            double totalDuration = 0;
+            double weightedSum = 0;
+            foreach (var s in segs)
+            {
+                double dur = Math.Max(s.End - s.Start, 0.1); // avoid zero-weight
+                weightedSum += s.NoSpeechProb * dur;
+                totalDuration += dur;
+            }
+            noSpeechProb = totalDuration > 0 ? weightedSum / totalDuration : segs.Max(s => s.NoSpeechProb);
         }
 
         FileLogger.Info($"Whisper: no_speech_prob={noSpeechProb:F3}, duration={result?.Duration:F1}s");
@@ -87,5 +99,11 @@ public class WhisperApiProvider : ISttProvider
     {
         [JsonPropertyName("no_speech_prob")]
         public double NoSpeechProb { get; set; }
+
+        [JsonPropertyName("start")]
+        public double Start { get; set; }
+
+        [JsonPropertyName("end")]
+        public double End { get; set; }
     }
 }

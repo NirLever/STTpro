@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ==========================================================
+         DARK THEME PALETTE  (mirror of Palette.Light.xaml)
+         ========================================================== -->
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="BgPrimary"   Color="#FF161619"/>
+    <SolidColorBrush x:Key="BgCard"      Color="#FF1F1F24"/>
+    <SolidColorBrush x:Key="BgInput"     Color="#FF2A2A31"/>
+    <SolidColorBrush x:Key="BgElevated"  Color="#FF26262C"/>
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="BorderColor"  Color="#FF34343B"/>
+    <SolidColorBrush x:Key="BorderStrong" Color="#FF47474F"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimary"   Color="#FFF4F4F6"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#FFAEAEB8"/>
+    <SolidColorBrush x:Key="TextMuted"     Color="#FF7E7E88"/>
+    <SolidColorBrush x:Key="TextOnAccent"  Color="#FFFFFFFF"/>
+
+    <!-- Accents -->
+    <SolidColorBrush x:Key="AccentBlue"      Color="#FF0A84FF"/>
+    <SolidColorBrush x:Key="AccentBlueHover" Color="#FF3D9BFF"/>
+    <SolidColorBrush x:Key="AccentGreen"     Color="#FF32D74B"/>
+    <SolidColorBrush x:Key="AccentRed"       Color="#FFFF453A"/>
+    <SolidColorBrush x:Key="AccentOrange"    Color="#FFFF9F0A"/>
+
+    <!-- Overlays / tints -->
+    <SolidColorBrush x:Key="HoverOverlay"        Color="#14FFFFFF"/>
+    <SolidColorBrush x:Key="PressOverlay"        Color="#22FFFFFF"/>
+    <SolidColorBrush x:Key="SelectedOverlay"     Color="#2A0A84FF"/>
+    <SolidColorBrush x:Key="OverlaySubtle"       Color="#10FFFFFF"/>
+    <SolidColorBrush x:Key="BadgeBlueBg"         Color="#2A0A84FF"/>
+    <SolidColorBrush x:Key="BadgeOrangeBg"       Color="#2AFF9F0A"/>
+    <SolidColorBrush x:Key="AccentBorderSubtle"  Color="#550A84FF"/>
+    <SolidColorBrush x:Key="ScrollThumb"         Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="ScrollThumbHover"    Color="#55FFFFFF"/>
+
+    <!-- Shadow -->
+    <Color x:Key="ShadowColor">#66000000</Color>
+
+    <sys:Boolean xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="IsDarkTheme">True</sys:Boolean>
+</ResourceDictionary>

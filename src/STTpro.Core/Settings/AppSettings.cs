@@ -145,6 +145,18 @@ public class AppSettings
     /// </summary>
     public bool AddTrailingPeriod { get; set; } = true;
 
+    /// <summary>
+    /// When true, recordings shorter than MinRecordingDurationMs are
+    /// silently discarded instead of being sent to the STT provider.
+    /// </summary>
+    public bool SkipShortRecordings { get; set; } = true;
+
+    /// <summary>
+    /// Minimum recording duration in milliseconds. Recordings shorter than
+    /// this are skipped when SkipShortRecordings is enabled. Default: 250 ms.
+    /// </summary>
+    public int MinRecordingDurationMs { get; set; } = 250;
+
     // Smart Prompts
     /// <summary>
     /// "toggle" = press hotkey to start, press again to stop.

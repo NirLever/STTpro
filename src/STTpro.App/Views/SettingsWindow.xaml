@@ -1,226 +1,15 @@
 <Window x:Class="STTpro.App.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="STTpro" Height="720" Width="520"
+        Title="STTpro" Height="740" Width="540"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
-        MinHeight="500" MinWidth="440"
-        Background="#FFF5F5F7"
+        MinHeight="520" MinWidth="460"
+        Background="{DynamicResource BgPrimary}"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
         FontFamily="Segoe UI"
         WindowStyle="SingleBorderWindow">
-    <Window.Resources>
-        <!-- Light theme colors -->
-        <SolidColorBrush x:Key="BgPrimary" Color="#FFF5F5F7"/>
-        <SolidColorBrush x:Key="BgCard" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="BgInput" Color="#FFF0F0F2"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#FFD8D8DC"/>
-        <SolidColorBrush x:Key="TextPrimary" Color="#FF1D1D1F"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#FF555555"/>
-        <SolidColorBrush x:Key="TextMuted" Color="#FF8E8E93"/>
-        <SolidColorBrush x:Key="AccentBlue" Color="#FF007AFF"/>
-        <SolidColorBrush x:Key="AccentGreen" Color="#FF34C759"/>
-        <SolidColorBrush x:Key="AccentRed" Color="#FFFF3B30"/>
-        <SolidColorBrush x:Key="AccentOrange" Color="#FFFF9500"/>
-
-        <!-- Section label -->
-        <Style x:Key="SectionLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,0,6"/>
-        </Style>
-
-        <!-- Field label -->
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
-        </Style>
-
-        <!-- Rounded TextBox -->
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,7"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="CaretBrush" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Rounded PasswordBox -->
-        <Style TargetType="PasswordBox">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,7"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="CaretBrush" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="PasswordBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Styled ComboBox -->
-        <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,7"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
-
-        <!-- Modern CheckBox -->
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Margin" Value="0,4,0,4"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <!-- Rounded Button -->
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Secondary Button -->
-        <Style x:Key="SecondaryButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Hotkey Button -->
-        <Style x:Key="HotkeyButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource BgInput}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontFamily" Value="Cascadia Code, Consolas, Courier New"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="MinWidth" Value="140"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Delete Button -->
-        <Style x:Key="DeleteButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="{StaticResource AccentRed}"/>
-        </Style>
-
-        <!-- Card Border -->
-        <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource BgCard}"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="16,14"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="#20000000" BlurRadius="8" ShadowDepth="1" Opacity="0.15"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -229,46 +18,22 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,16,20,0">
-            <TextBlock Text="STTpro" FontSize="22" FontWeight="Bold" Foreground="{StaticResource AccentBlue}"/>
-            <TextBlock Text=" Settings" FontSize="22" FontWeight="Light" Foreground="{StaticResource TextPrimary}"/>
+        <StackPanel Grid.Row="0" Margin="22,18,22,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="STT" FontSize="23" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                <TextBlock Text="pro" FontSize="23" FontWeight="Light" Foreground="{DynamicResource TextPrimary}"/>
+            </StackPanel>
+            <TextBlock Text="Speech to text, everywhere you type" FontSize="12"
+                       Foreground="{DynamicResource TextMuted}" Margin="0,1,0,0"/>
         </StackPanel>
 
         <!-- Tab Control -->
-        <TabControl Grid.Row="1" Margin="16,10,16,16" Background="Transparent" BorderThickness="0">
-            <TabControl.Resources>
-                <Style TargetType="TabItem">
-                    <Setter Property="FontSize" Value="13"/>
-                    <Setter Property="Padding" Value="14,6"/>
-                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="TabItem">
-                                <Border x:Name="TabBorder" Padding="{TemplateBinding Padding}"
-                                        Background="Transparent" Cursor="Hand"
-                                        BorderThickness="0,0,0,2" BorderBrush="Transparent">
-                                    <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
-                                        <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="TabBorder" Property="Background" Value="#08000000"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TabControl.Resources>
+        <TabControl Grid.Row="1" Margin="16,12,16,16" Background="Transparent" BorderThickness="0">
 
             <!-- ==================== SETTINGS TAB ==================== -->
             <TabItem Header="Settings">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
-                    <StackPanel Margin="4,12,4,4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0" Margin="0,4,0,0">
+                    <StackPanel Margin="4,12,10,4">
 
                         <!-- API Providers Card (combined) -->
                         <Border Style="{StaticResource Card}">
@@ -276,15 +41,15 @@
                                 <TextBlock Text="API PROVIDERS" Style="{StaticResource SectionLabel}"/>
 
                                 <!-- STT row -->
-                                <Grid Margin="0,0,0,6">
+                                <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="44"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="8"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="STT" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
-                                               Foreground="{StaticResource TextSecondary}"/>
+                                               Foreground="{DynamicResource TextSecondary}"/>
                                     <ComboBox x:Name="SttProviderCombo" Grid.Column="1" SelectionChanged="SttProvider_Changed"/>
                                     <ComboBox x:Name="SttModelCombo" Grid.Column="3" IsEditable="True"
                                               SelectionChanged="SttModel_Changed" LostFocus="SttModel_Changed"
@@ -292,15 +57,15 @@
                                 </Grid>
 
                                 <!-- LLM row -->
-                                <Grid Margin="0,0,0,6">
+                                <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="44"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="8"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="LLM" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
-                                               Foreground="{StaticResource TextSecondary}"/>
+                                               Foreground="{DynamicResource TextSecondary}"/>
                                     <ComboBox x:Name="LlmProviderCombo" Grid.Column="1" SelectionChanged="LlmProvider_Changed"/>
                                     <ComboBox x:Name="LlmModelCombo" Grid.Column="3" IsEditable="True"
                                               SelectionChanged="LlmModel_Changed" LostFocus="LlmModel_Changed"
@@ -308,53 +73,53 @@
                                 </Grid>
 
                                 <!-- Capability hint -->
-                                <TextBlock x:Name="SttCapabilityHint" FontSize="10" Foreground="{StaticResource AccentGreen}" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="SttCapabilityHint" FontSize="10.5" Foreground="{DynamicResource AccentGreen}" Margin="0,0,0,4"/>
 
                                 <!-- API Key section -->
-                                <StackPanel x:Name="SttApiKeyPanel" Margin="0,4,0,0">
+                                <StackPanel x:Name="SttApiKeyPanel" Margin="0,6,0,0">
                                     <TextBlock x:Name="ApiKeyLabel" Text="API Key" Style="{StaticResource FieldLabel}"/>
                                     <Grid Margin="0,0,0,2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <PasswordBox x:Name="SttApiKeyBox" Grid.Column="0"/>
+                                        <PasswordBox x:Name="SttApiKeyBox" Grid.Column="0" GotFocus="ApiKeyBox_GotFocus"/>
                                         <Button x:Name="SaveSttApiKeyBtn" Grid.Column="1" Content="Save" Margin="8,0,0,0"
                                                 Click="SaveSttApiKey_Click"/>
                                     </Grid>
-                                    <TextBlock x:Name="SttApiKeyStatus" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="SttApiKeyStatus" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,3,0,0"/>
                                 </StackPanel>
 
                                 <!-- Shared key checkbox (only when same provider type) -->
                                 <CheckBox x:Name="UseSharedApiKeyCheck" Content="Use same API key for LLM"
                                           Checked="UseSharedApiKey_Changed" Unchecked="UseSharedApiKey_Changed"
-                                          Margin="0,2,0,0"/>
+                                          Margin="0,4,0,0"/>
 
                                 <!-- Separate LLM key (only when different providers) -->
-                                <StackPanel x:Name="LlmApiKeyPanel" Margin="0,4,0,0">
+                                <StackPanel x:Name="LlmApiKeyPanel" Margin="0,6,0,0">
                                     <TextBlock x:Name="LlmApiKeyLabel" Text="LLM API Key" Style="{StaticResource FieldLabel}"/>
                                     <Grid Margin="0,0,0,2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <PasswordBox x:Name="LlmApiKeyBox" Grid.Column="0"/>
+                                        <PasswordBox x:Name="LlmApiKeyBox" Grid.Column="0" GotFocus="ApiKeyBox_GotFocus"/>
                                         <Button x:Name="SaveLlmApiKeyBtn" Grid.Column="1" Content="Save" Margin="8,0,0,0"
                                                 Click="SaveLlmApiKey_Click"/>
                                     </Grid>
-                                    <TextBlock x:Name="LlmApiKeyStatus" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="LlmApiKeyStatus" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,3,0,0"/>
                                 </StackPanel>
 
-                                <!-- Base URL overrides (collapsed by default) -->
-                                <StackPanel x:Name="SttBaseUrlPanel" Margin="0,4,0,0">
+                                <!-- Base URL overrides -->
+                                <StackPanel x:Name="SttBaseUrlPanel" Margin="0,6,0,0">
                                     <TextBlock Text="STT Base URL" Style="{StaticResource FieldLabel}"/>
                                     <TextBox x:Name="SttBaseUrlBox" LostFocus="SttBaseUrl_Changed"/>
-                                    <TextBlock x:Name="SttBaseUrlHint" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="SttBaseUrlHint" Style="{StaticResource HintLabel}" Margin="0,3,0,0"/>
                                 </StackPanel>
-                                <StackPanel x:Name="LlmBaseUrlPanel" Margin="0,4,0,0">
+                                <StackPanel x:Name="LlmBaseUrlPanel" Margin="0,6,0,0">
                                     <TextBlock Text="LLM Base URL" Style="{StaticResource FieldLabel}"/>
                                     <TextBox x:Name="LlmBaseUrlBox" LostFocus="LlmBaseUrl_Changed"/>
-                                    <TextBlock x:Name="LlmBaseUrlHint" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="LlmBaseUrlHint" Style="{StaticResource HintLabel}" Margin="0,3,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -368,8 +133,7 @@
                             <StackPanel>
                                 <TextBlock Text="API USAGE" Style="{StaticResource SectionLabel}"/>
                                 <TextBlock Text="Estimated API costs based on usage. Actual billing may vary."
-                                           FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,0,0,6"
-                                           TextWrapping="Wrap" FontStyle="Italic"/>
+                                           Style="{StaticResource HintLabel}" Margin="0,-4,0,10" FontStyle="Italic"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -377,22 +141,21 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Transcriptions" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                        <TextBlock x:Name="UsageCountLabel" Text="0" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                                        <TextBlock Text="Transcriptions" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                        <TextBlock x:Name="UsageCountLabel" Text="0" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="Audio Minutes" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                        <TextBlock x:Name="UsageMinutesLabel" Text="0.0" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                                        <TextBlock Text="Audio Minutes" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                        <TextBlock x:Name="UsageMinutesLabel" Text="0.0" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Est. Cost (approx)" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                        <TextBlock x:Name="UsageCostLabel" Text="$0.00" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentGreen}"/>
+                                        <TextBlock Text="Est. Cost (approx)" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                        <TextBlock x:Name="UsageCostLabel" Text="$0.00" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource AccentGreen}"/>
                                     </StackPanel>
                                 </Grid>
-                                <TextBlock x:Name="UsageDetailsLabel" Text="" FontSize="10" Foreground="{StaticResource TextMuted}" Margin="0,6,0,0"/>
-                                <Button Content="Reset Usage" HorizontalAlignment="Left" Margin="0,6,0,0"
-                                        Style="{StaticResource SecondaryButton}" Click="ResetUsage_Click"
-                                        Padding="10,4" FontSize="11"/>
+                                <TextBlock x:Name="UsageDetailsLabel" Text="" Style="{StaticResource HintLabel}" Margin="0,8,0,0"/>
+                                <Button Content="Reset Usage" HorizontalAlignment="Left" Margin="0,10,0,0"
+                                        Style="{StaticResource MiniButton}" Click="ResetUsage_Click"/>
                             </StackPanel>
                         </Border>
 
@@ -410,7 +173,7 @@
                             <StackPanel>
                                 <TextBlock Text="TRANSCRIPTION" Style="{StaticResource SectionLabel}"/>
                                 <TextBlock Text="Language" Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="LanguageCombo" SelectionChanged="Language_Changed" Margin="0,0,0,8">
+                                <ComboBox x:Name="LanguageCombo" SelectionChanged="Language_Changed" Margin="0,0,0,10">
                                     <ComboBoxItem Content="Auto-detect" Tag=""/>
                                     <ComboBoxItem Content="English" Tag="en"/>
                                     <ComboBoxItem Content="Hebrew" Tag="he"/>
@@ -434,25 +197,26 @@
                         <Border Style="{StaticResource Card}">
                             <StackPanel>
                                 <TextBlock Text="SMART PROMPTS" Style="{StaticResource SectionLabel}"/>
-                                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,0,0,8">
-                                    <Run Text="Press the hotkey (default Ctrl+Shift+1, 2, 3...) to start recording with a prompt. Your recording will be post-processed through the selected prompt."/>
+                                <TextBlock Style="{StaticResource HintLabel}" Margin="0,-4,0,10">
+                                    <Run Text="Press the hotkey (default Ctrl+Shift+1, 2, 3...) to record with a prompt. Your recording is post-processed through the selected prompt."/>
                                     <LineBreak/>
-                                    <Run Text="Click on the name or text below to edit a prompt." FontStyle="Italic"/>
+                                    <Run Text="Click a name or text below to edit a prompt." FontStyle="Italic"/>
                                 </TextBlock>
 
                                 <!-- Prompt Hotkey Mode -->
-                                <Grid Margin="0,0,0,10">
+                                <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Mode:" VerticalAlignment="Center" FontSize="12" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Mode:" VerticalAlignment="Center" FontSize="12" Margin="0,0,12,0"
+                                               Foreground="{DynamicResource TextSecondary}"/>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <RadioButton x:Name="PromptModeToggle" Content="Toggle (press to start, press again to stop)"
-                                                     GroupName="PromptMode" Margin="0,0,16,0" FontSize="11"
+                                        <RadioButton x:Name="PromptModeToggle" Content="Toggle (press to start / stop)"
+                                                     GroupName="PromptMode" Margin="0,0,18,0"
                                                      Checked="PromptMode_Changed"/>
-                                        <RadioButton x:Name="PromptModeHold" Content="Hold (hold to record, release to stop)"
-                                                     GroupName="PromptMode" FontSize="11"
+                                        <RadioButton x:Name="PromptModeHold" Content="Hold (record while held)"
+                                                     GroupName="PromptMode"
                                                      Checked="PromptMode_Changed"/>
                                     </StackPanel>
                                 </Grid>
@@ -461,9 +225,8 @@
                                     <!-- Prompts are added dynamically in code-behind -->
                                 </ItemsControl>
 
-                                <Button Content="+ Add Prompt" HorizontalAlignment="Left" Margin="0,6,0,0"
-                                        Style="{StaticResource SecondaryButton}" Click="AddPrompt_Click"
-                                        Padding="10,4" FontSize="11"/>
+                                <Button Content="+ Add Prompt" HorizontalAlignment="Left" Margin="0,4,0,0"
+                                        Style="{StaticResource MiniButton}" Click="AddPrompt_Click"/>
                             </StackPanel>
                         </Border>
 
@@ -472,46 +235,43 @@
                             <StackPanel>
                                 <TextBlock Text="HOTKEYS" Style="{StaticResource SectionLabel}"/>
                                 <TextBlock Text="Click a hotkey to rebind it. Press the new key combination, then Enter to confirm or Escape to cancel."
-                                           FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                                           Style="{StaticResource HintLabel}" Margin="0,-4,0,12"/>
 
-                                <Grid Margin="0,0,0,6">
+                                <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Hold to talk" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" FontSize="13"/>
+                                    <TextBlock Text="Hold to talk" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" FontSize="13"/>
                                     <Button x:Name="HoldToTalkBtn" Grid.Column="1" Style="{StaticResource HotkeyButton}"
                                             Click="HoldToTalkBtn_Click"/>
-                                    <Button Grid.Column="2" Content="Reset"
-                                            Style="{StaticResource SecondaryButton}" Padding="6,4" FontSize="10"
-                                            Margin="4,0,0,0" Click="RevertHoldToTalk_Click" ToolTip="Reset to Ctrl + Space"/>
+                                    <Button Grid.Column="2" Content="Reset" Style="{StaticResource MiniButton}"
+                                            Margin="6,0,0,0" Click="RevertHoldToTalk_Click" ToolTip="Reset to Ctrl + Space"/>
                                 </Grid>
-                                <Grid Margin="0,0,0,6">
+                                <Grid Margin="0,0,0,8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Toggle recording" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" FontSize="13"/>
+                                    <TextBlock Text="Toggle recording" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" FontSize="13"/>
                                     <Button x:Name="ToggleRecordingBtn" Grid.Column="1" Style="{StaticResource HotkeyButton}"
                                             Click="ToggleRecordingBtn_Click"/>
-                                    <Button Grid.Column="2" Content="Reset"
-                                            Style="{StaticResource SecondaryButton}" Padding="6,4" FontSize="10"
-                                            Margin="4,0,0,0" Click="RevertToggleRecording_Click" ToolTip="Reset to Ctrl + Shift + Space"/>
+                                    <Button Grid.Column="2" Content="Reset" Style="{StaticResource MiniButton}"
+                                            Margin="6,0,0,0" Click="RevertToggleRecording_Click" ToolTip="Reset to Ctrl + Shift + Space"/>
                                 </Grid>
-                                <Grid Margin="0,0,0,6">
+                                <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Paste last" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" FontSize="13"/>
+                                    <TextBlock Text="Paste last" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}" FontSize="13"/>
                                     <Button x:Name="PasteLastBtn" Grid.Column="1" Style="{StaticResource HotkeyButton}"
                                             Click="PasteLastBtn_Click"/>
-                                    <Button Grid.Column="2" Content="Reset"
-                                            Style="{StaticResource SecondaryButton}" Padding="6,4" FontSize="10"
-                                            Margin="4,0,0,0" Click="RevertPasteLast_Click" ToolTip="Reset to Ctrl + Shift + V"/>
+                                    <Button Grid.Column="2" Content="Reset" Style="{StaticResource MiniButton}"
+                                            Margin="6,0,0,0" Click="RevertPasteLast_Click" ToolTip="Reset to Ctrl + Shift + V"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -526,28 +286,30 @@
                                           Checked="RestoreClipboard_Changed" Unchecked="RestoreClipboard_Changed"/>
                                 <CheckBox x:Name="AddTrailingPeriodCheck" Content="Add period at end of sentences"
                                           Checked="AddTrailingPeriod_Changed" Unchecked="AddTrailingPeriod_Changed"/>
+                                <CheckBox x:Name="SkipShortRecordingsCheck" Content="Skip recordings under 1 second"
+                                          Checked="SkipShortRecordings_Changed" Unchecked="SkipShortRecordings_Changed"/>
                                 <CheckBox x:Name="LaunchOnStartupCheck" Content="Launch on Windows startup"
                                           Checked="LaunchOnStartup_Changed" Unchecked="LaunchOnStartup_Changed"/>
 
                                 <!-- Silence sensitivity -->
-                                <StackPanel Margin="0,10,0,0">
+                                <StackPanel Margin="0,12,0,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Silence sensitivity:" VerticalAlignment="Center"
-                                                   Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,8,0"/>
-                                        <TextBlock x:Name="SilenceThresholdLabel" FontSize="12"
-                                                   Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                                                   Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,8,0"/>
+                                        <TextBlock x:Name="SilenceThresholdLabel" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                     <Slider x:Name="SilenceSlider" Minimum="0.3" Maximum="0.95"
                                             TickFrequency="0.05" IsSnapToTickEnabled="True"
-                                            ValueChanged="SilenceSlider_Changed" Margin="0,4,0,0"/>
+                                            ValueChanged="SilenceSlider_Changed" Margin="0,6,0,0"/>
                                     <TextBlock Text="Lower = keep more audio (less filtering). Higher = filter out more silence/noise."
-                                               FontSize="10" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"/>
+                                               Style="{StaticResource HintLabel}" Margin="0,2,0,0"/>
                                 </StackPanel>
 
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                                     <TextBlock Text="History retention:" VerticalAlignment="Center"
-                                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,0,8,0"/>
-                                    <ComboBox x:Name="HistoryRetentionCombo" SelectionChanged="HistoryRetention_Changed" Width="180">
+                                               Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,8,0"/>
+                                    <ComboBox x:Name="HistoryRetentionCombo" SelectionChanged="HistoryRetention_Changed" Width="190">
                                         <ComboBoxItem Content="Save everything" Tag="0"/>
                                         <ComboBoxItem Content="Keep last 20" Tag="20"/>
                                         <ComboBoxItem Content="Keep last 50" Tag="50"/>
@@ -555,13 +317,16 @@
                                         <ComboBoxItem Content="Keep last 500" Tag="500"/>
                                     </ComboBox>
                                 </StackPanel>
+
+                                <TextBlock Text="Appearance follows your Windows light / dark setting automatically."
+                                           Style="{StaticResource HintLabel}" Margin="0,12,0,0" FontStyle="Italic"/>
                             </StackPanel>
                         </Border>
 
                         <!-- Reset to Defaults -->
                         <Button Content="Reset All Settings to Default" HorizontalAlignment="Stretch"
                                 Style="{StaticResource SecondaryButton}" Click="ResetToDefaults_Click"
-                                Margin="0,0,0,10" Padding="12,8" FontSize="12"/>
+                                Margin="0,0,0,10"/>
 
                     </StackPanel>
                 </ScrollViewer>
@@ -569,7 +334,7 @@
 
             <!-- ==================== HISTORY TAB ==================== -->
             <TabItem Header="History">
-                <Grid Margin="4,12,4,4">
+                <Grid Margin="4,16,4,4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
@@ -578,7 +343,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Search bar -->
-                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -588,60 +353,30 @@
                     </Grid>
 
                     <!-- Transcript list -->
-                    <Border Grid.Row="1" Background="{StaticResource BgCard}" CornerRadius="10"
-                            BorderBrush="{StaticResource BorderColor}" BorderThickness="1">
+                    <Border Grid.Row="1" Background="{DynamicResource BgCard}" CornerRadius="12"
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                         <ListBox x:Name="HistoryList" Background="Transparent" BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="12,8"/>
-                                    <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListBoxItem">
-                                                <Border x:Name="Bd" Background="Transparent"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter/>
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="Bd" Property="Background" Value="#08000000"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsSelected" Value="True">
-                                                        <Setter TargetName="Bd" Property="Background" Value="#15007AFF"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                        </ListBox>
+                                 ItemContainerStyle="{StaticResource HistoryItem}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
                     </Border>
 
                     <!-- Action buttons -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-                        <Button Content="Copy" Click="HistoryCopy_Click"
-                                Padding="12,6" FontSize="12" Margin="0,0,6,0"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="Copy" Click="HistoryCopy_Click" Margin="0,0,6,0"/>
                         <Button Content="Delete" Click="HistoryDelete_Click"
-                                Style="{StaticResource DeleteButton}" Padding="12,6" FontSize="12" Margin="0,0,6,0"/>
+                                Style="{StaticResource DeleteButton}" Margin="0,0,6,0"/>
                         <Button Content="Refresh" Click="HistoryRefresh_Click"
-                                Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12" Margin="0,0,6,0"/>
+                                Style="{StaticResource SecondaryButton}" Margin="0,0,6,0"/>
                         <Button Content="Export JSON" Click="ExportJson_Click"
-                                Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12" Margin="0,0,6,0"/>
+                                Style="{StaticResource SecondaryButton}" Margin="0,0,6,0"/>
                         <Button Content="Export Text" Click="ExportText_Click"
-                                Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12"/>
+                                Style="{StaticResource SecondaryButton}"/>
                     </StackPanel>
 
                     <!-- Privacy note -->
-                    <TextBlock Grid.Row="3" Margin="0,8,0,0"
+                    <TextBlock Grid.Row="3" Margin="0,10,0,0"
                                Text="All transcriptions are stored locally on this device and are never sent anywhere."
-                               FontSize="10" Foreground="{StaticResource TextMuted}"
-                               TextWrapping="Wrap" FontStyle="Italic"/>
+                               Style="{StaticResource HintLabel}" FontStyle="Italic"/>
                 </Grid>
             </TabItem>
         </TabControl>

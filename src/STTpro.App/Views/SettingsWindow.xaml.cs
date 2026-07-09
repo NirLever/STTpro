@@ -87,6 +87,7 @@ public partial class SettingsWindow : Window
         ShowIndicatorCheck.IsChecked = s.ShowRecordingIndicator;
         RestoreClipboardCheck.IsChecked = s.RestoreClipboard;
         AddTrailingPeriodCheck.IsChecked = s.AddTrailingPeriod;
+        SkipShortRecordingsCheck.IsChecked = s.SkipShortRecordings;
         LaunchOnStartupCheck.IsChecked = s.LaunchOnStartup;
 
         // Silence sensitivity
@@ -156,15 +157,15 @@ public partial class SettingsWindow : Window
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 12
             });
-            panel.Children.Add(new TextBlock
+            var descBlock = new TextBlock
             {
                 Text = desc,
                 FontSize = 10,
-                Foreground = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromRgb(0x88, 0x88, 0x88)),
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = 280
-            });
+            };
+            descBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextMuted");
+            panel.Children.Add(descBlock);
             item.Content = panel;
         }
         else
@@ -426,21 +427,24 @@ public partial class SettingsWindow : Window
 
     private void SaveProviderApiKey(PasswordBox box, ApiProviderConfig config, TextBlock status, ProviderPreset? preset)
     {
-        var key = box.Password.Trim();
+        // Strip any leftover placeholder dots that may have been appended
+        // to a paste, then trim whitespace.
+        var key = box.Password.Replace("•", "").Trim();
         if (string.IsNullOrEmpty(key))
         {
             status.Text = "Please enter an API key.";
-            return;
-        }
-        if (key == "••••••••••••••••")
-        {
-            status.Text = $"API key saved ({config.ApiKeySlot}).";
             return;
         }
 
         _credStore.SaveApiKey(key, config.ApiKeySlot);
         status.Text = $"API key saved securely ({config.ApiKeySlot}).";
         box.Password = "••••••••••••••••";
+    }
+
+    private void ApiKeyBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is PasswordBox box && box.Password.All(c => c == '•'))
+            box.Password = "";
     }
 
     private async void SttBaseUrl_Changed(object sender, RoutedEventArgs e)
@@ -849,11 +853,11 @@ public partial class SettingsWindow : Window
 
             var card = new Border
             {
-                Background = FindResource("BgInput") as System.Windows.Media.Brush,
-                CornerRadius = new CornerRadius(8),
+                CornerRadius = new CornerRadius(9),
                 Padding = new Thickness(14, 12, 14, 12),
                 Margin = new Thickness(0, 0, 0, 10)
             };
+            card.SetResourceReference(Border.BackgroundProperty, "BgInput");
 
             var grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -868,16 +872,15 @@ public partial class SettingsWindow : Window
                 Content = hotkeyDisplay,
                 FontSize = 10,
                 FontFamily = new System.Windows.Media.FontFamily("Cascadia Code, Consolas"),
-                Foreground = FindResource("AccentBlue") as System.Windows.Media.Brush,
-                Background = System.Windows.Media.Brushes.Transparent,
+                Style = FindResource("MiniButton") as Style,
                 BorderThickness = new Thickness(1),
-                BorderBrush = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(0x40, 0x00, 0x7A, 0xFF)),
-                Padding = new Thickness(4, 1, 4, 1),
+                Padding = new Thickness(7, 2, 7, 2),
                 Margin = new Thickness(0, 0, 6, 0),
                 Cursor = System.Windows.Input.Cursors.Hand,
                 ToolTip = "Click to rebind hotkey"
             };
+            hotkeyBtn.SetResourceReference(Button.ForegroundProperty, "AccentBlue");
+            hotkeyBtn.SetResourceReference(Button.BorderBrushProperty, "AccentBorderSubtle");
             var hkIdx = idx;
             hotkeyBtn.Click += (_, _) => StartPromptHotkeyCapture(hotkeyBtn, hkIdx);
             header.Children.Add(hotkeyBtn);
@@ -889,12 +892,12 @@ public partial class SettingsWindow : Window
                 FontWeight = FontWeights.SemiBold,
                 Background = System.Windows.Media.Brushes.Transparent,
                 BorderThickness = new Thickness(0, 0, 0, 1),
-                BorderBrush = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(0x40, 0x00, 0x7A, 0xFF)),
                 Padding = new Thickness(2, 0, 2, 1),
                 MinWidth = 100,
+                VerticalContentAlignment = VerticalAlignment.Center,
                 ToolTip = "Click to edit name"
             };
+            nameBox.SetResourceReference(TextBox.BorderBrushProperty, "AccentBorderSubtle");
             var nameIdx = idx;
             nameBox.LostFocus += async (_, _) =>
             {
@@ -913,17 +916,15 @@ public partial class SettingsWindow : Window
                 FontSize = 11,
                 TextWrapping = TextWrapping.Wrap,
                 MaxHeight = 72,
-                Background = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(0x18, 0x00, 0x00, 0x00)),
-                BorderThickness = new Thickness(0, 0, 0, 1),
-                BorderBrush = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(0x30, 0x88, 0x88, 0x88)),
-                Padding = new Thickness(4, 3, 4, 3),
-                Foreground = FindResource("TextSecondary") as System.Windows.Media.Brush,
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(7, 5, 7, 5),
                 AcceptsReturn = true,
                 ToolTip = "Click to edit prompt text",
-                Margin = new Thickness(0, 0, 0, 0)
+                Margin = new Thickness(0, 2, 0, 0)
             };
+            promptBox.SetResourceReference(TextBox.BackgroundProperty, "BgCard");
+            promptBox.SetResourceReference(TextBox.BorderBrushProperty, "BorderColor");
+            promptBox.SetResourceReference(TextBox.ForegroundProperty, "TextSecondary");
             var promptIdx = idx;
             promptBox.LostFocus += async (_, _) =>
             {
@@ -944,14 +945,14 @@ public partial class SettingsWindow : Window
             var revertHkBtn = new Button
             {
                 Content = "Reset",
-                FontSize = 9,
-                Padding = new Thickness(4, 2, 4, 2),
-                Background = FindResource("BgInput") as System.Windows.Media.Brush,
-                Foreground = FindResource("TextMuted") as System.Windows.Media.Brush,
-                Margin = new Thickness(0, 0, 0, 4),
+                FontSize = 10,
+                Style = FindResource("MiniButton") as Style,
+                Padding = new Thickness(8, 3, 8, 3),
+                Margin = new Thickness(0, 0, 0, 5),
                 Cursor = System.Windows.Input.Cursors.Hand,
                 ToolTip = $"Reset to Ctrl+Shift+{idx + 1}"
             };
+            revertHkBtn.SetResourceReference(Button.ForegroundProperty, "TextMuted");
             var revertIdx = idx;
             revertHkBtn.Click += async (_, _) =>
             {
@@ -969,11 +970,13 @@ public partial class SettingsWindow : Window
             {
                 Content = "×",
                 FontSize = 14,
-                Padding = new Thickness(6, 2, 6, 2),
-                Foreground = FindResource("TextMuted") as System.Windows.Media.Brush,
-                Background = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(0x18, 0x00, 0x00, 0x00)),
+                FontWeight = FontWeights.Bold,
+                Style = FindResource("MiniButton") as Style,
+                Padding = new Thickness(9, 1, 9, 2),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                ToolTip = "Remove prompt"
             };
+            removeBtn.SetResourceReference(Button.ForegroundProperty, "AccentRed");
             var removeIdx = idx;
             removeBtn.Click += async (_, _) =>
             {
@@ -1024,57 +1027,52 @@ public partial class SettingsWindow : Window
             sp.Tag = r; // store full record for copy/delete/export
 
             var headerPanel = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal };
-            headerPanel.Children.Add(new TextBlock
+            var tsBlock = new TextBlock
             {
                 Text = r.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
                 FontSize = 10,
-                Foreground = FindResource("TextMuted") as System.Windows.Media.Brush,
-                Margin = new Thickness(0, 0, 8, 0)
-            });
+                Margin = new Thickness(0, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            tsBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextMuted");
+            headerPanel.Children.Add(tsBlock);
             if (!string.IsNullOrEmpty(r.DetectedLanguage))
             {
                 var langBorder = new Border
                 {
-                    Background = new System.Windows.Media.SolidColorBrush(
-                        System.Windows.Media.Color.FromArgb(0x15, 0x00, 0x7A, 0xFF)),
-                    CornerRadius = new CornerRadius(3),
-                    Padding = new Thickness(5, 1, 5, 1),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(6, 1, 6, 1),
                     Margin = new Thickness(0, 0, 8, 0),
                     VerticalAlignment = VerticalAlignment.Center
                 };
-                langBorder.Child = new TextBlock
-                {
-                    Text = r.DetectedLanguage,
-                    FontSize = 10,
-                    Foreground = FindResource("AccentBlue") as System.Windows.Media.Brush
-                };
+                langBorder.SetResourceReference(Border.BackgroundProperty, "BadgeBlueBg");
+                var langText = new TextBlock { Text = r.DetectedLanguage, FontSize = 10 };
+                langText.SetResourceReference(TextBlock.ForegroundProperty, "AccentBlue");
+                langBorder.Child = langText;
                 headerPanel.Children.Add(langBorder);
             }
-            headerPanel.Children.Add(new TextBlock
+            var durBlock = new TextBlock
             {
                 Text = $"{r.DurationSeconds:F1}s",
                 FontSize = 10,
-                Foreground = FindResource("TextMuted") as System.Windows.Media.Brush,
                 VerticalAlignment = VerticalAlignment.Center
-            });
+            };
+            durBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextMuted");
+            headerPanel.Children.Add(durBlock);
             // Show prompt badge if used
             if (!string.IsNullOrEmpty(r.PromptName))
             {
                 var promptBorder = new Border
                 {
-                    Background = new System.Windows.Media.SolidColorBrush(
-                        System.Windows.Media.Color.FromArgb(0x15, 0xFF, 0x95, 0x00)),
-                    CornerRadius = new CornerRadius(3),
-                    Padding = new Thickness(5, 1, 5, 1),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(6, 1, 6, 1),
                     Margin = new Thickness(8, 0, 0, 0),
                     VerticalAlignment = VerticalAlignment.Center
                 };
-                promptBorder.Child = new TextBlock
-                {
-                    Text = r.PromptName,
-                    FontSize = 10,
-                    Foreground = FindResource("AccentOrange") as System.Windows.Media.Brush
-                };
+                promptBorder.SetResourceReference(Border.BackgroundProperty, "BadgeOrangeBg");
+                var promptText = new TextBlock { Text = r.PromptName, FontSize = 10 };
+                promptText.SetResourceReference(TextBlock.ForegroundProperty, "AccentOrange");
+                promptBorder.Child = promptText;
                 headerPanel.Children.Add(promptBorder);
             }
             sp.Children.Add(headerPanel);
@@ -1083,28 +1081,30 @@ public partial class SettingsWindow : Window
             if (!string.IsNullOrEmpty(r.OriginalText))
             {
                 var origPreview = r.OriginalText.Length > 100 ? r.OriginalText[..100] + "..." : r.OriginalText;
-                sp.Children.Add(new TextBlock
+                var origBlock = new TextBlock
                 {
                     Text = $"Original: {origPreview}",
                     FontSize = 10,
-                    Foreground = FindResource("TextMuted") as System.Windows.Media.Brush,
                     TextWrapping = TextWrapping.Wrap,
                     MaxHeight = 28,
                     Margin = new Thickness(0, 2, 0, 0),
                     FontStyle = System.Windows.FontStyles.Italic
-                });
+                };
+                origBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextMuted");
+                sp.Children.Add(origBlock);
             }
 
             var textPreview = r.Text.Length > 200 ? r.Text[..200] + "..." : r.Text;
-            sp.Children.Add(new TextBlock
+            var textBlock = new TextBlock
             {
                 Text = textPreview,
                 FontSize = 12,
-                Foreground = FindResource("TextPrimary") as System.Windows.Media.Brush,
                 TextWrapping = TextWrapping.Wrap,
                 MaxHeight = 54,
                 Margin = new Thickness(0, 3, 0, 0)
-            });
+            };
+            textBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimary");
+            sp.Children.Add(textBlock);
 
             HistoryList.Items.Add(sp);
         }
@@ -1276,6 +1276,13 @@ public partial class SettingsWindow : Window
     {
         if (_loading) return;
         _settings.Current.AddTrailingPeriod = AddTrailingPeriodCheck.IsChecked == true;
+        await _settings.SaveAsync();
+    }
+
+    private async void SkipShortRecordings_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.Current.SkipShortRecordings = SkipShortRecordingsCheck.IsChecked == true;
         await _settings.SaveAsync();
     }
 

@@ -1,0 +1,3 @@
+@echo off
+echo Starting STTpro...
+start "" "%~dp0src\STTpro.App\bin\Debug\net8.0-windows\STTpro.App.exe"

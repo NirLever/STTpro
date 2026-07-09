@@ -9,22 +9,22 @@
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         IsHitTestVisible="False">
-    <Border CornerRadius="8"
-            Background="#F0FFFFFF"
-            BorderBrush="#40000000"
+    <Border CornerRadius="10"
+            Background="{DynamicResource BgElevated}"
+            BorderBrush="{DynamicResource BorderColor}"
             BorderThickness="1"
             Padding="16,10,16,10"
             HorizontalAlignment="Center"
             VerticalAlignment="Center">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.25"/>
+            <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="3" Opacity="0.32"/>
         </Border.Effect>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <!-- Recording dot -->
-            <Ellipse Width="8" Height="8" Fill="#FFFF3B30" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentRed}" VerticalAlignment="Center" Margin="0,0,8,0"/>
             <TextBlock x:Name="ToastText"
                        Text=""
-                       Foreground="#FF1D1D1F"
+                       Foreground="{DynamicResource TextPrimary}"
                        FontSize="13"
                        FontFamily="Segoe UI"
                        FontWeight="SemiBold"

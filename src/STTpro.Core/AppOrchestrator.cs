@@ -32,13 +32,13 @@ public class AppOrchestrator : IDisposable
 
     private AppState _state = AppState.Idle;
     private bool _isToggleRecording;
+    private bool _holdToTalkActive;
     private IntPtr _recordingStartWindowHwnd;
     private int _selectedPromptIndex = -1; // -1 = no prompt, 0+ = prompt index
 
     // Chunked transcription state
     private readonly List<string> _chunkResults = new();
-    private int _activeChunkTasks;
-    private readonly SemaphoreSlim _chunksDone = new(0);
+    private readonly List<Task> _chunkTasks = new();
 
     public AppState State => _state;
     public IntPtr RecordingTargetHwnd => _recordingStartWindowHwnd;
@@ -165,15 +165,29 @@ public class AppOrchestrator : IDisposable
 
     private void OnHoldToTalkStarted(object? sender, EventArgs e)
     {
-        if (_state != AppState.Idle) return;
+        if (_state != AppState.Idle)
+        {
+            FileLogger.Info($"Hold-to-talk: key DOWN ignored (state={_state})");
+            return;
+        }
         FileLogger.Info("Hold-to-talk: key DOWN -> starting recording");
         _isToggleRecording = false;
+        _holdToTalkActive = true;
         StartRecording();
     }
 
     private async void OnHoldToTalkEnded(object? sender, EventArgs e)
     {
-        if (_state != AppState.Recording || _isToggleRecording) return;
+        if (!_holdToTalkActive) return;
+        _holdToTalkActive = false;
+
+        if (_state != AppState.Recording)
+        {
+            FileLogger.Info($"Hold-to-talk: key UP ignored (state={_state})");
+            return;
+        }
+        if (_isToggleRecording) return;
+
         FileLogger.Info("Hold-to-talk: key UP -> stopping recording");
         await StopAndTranscribeAsync();
     }
@@ -277,9 +291,7 @@ public class AppOrchestrator : IDisposable
 
             // Clear chunk state
             lock (_chunkResults) { _chunkResults.Clear(); }
-            _activeChunkTasks = 0;
-            // Drain any leftover semaphore signals
-            while (_chunksDone.CurrentCount > 0) _chunksDone.Wait(0);
+            lock (_chunkTasks) { _chunkTasks.Clear(); }
 
             _audio.StartRecording();
             SetState(AppState.Recording);
@@ -291,7 +303,7 @@ public class AppOrchestrator : IDisposable
         }
     }
 
-    private async void OnSilenceDetected(object? sender, EventArgs e)
+    private void OnSilenceDetected(object? sender, EventArgs e)
     {
         if (_state != AppState.Recording) return;
 
@@ -300,8 +312,12 @@ public class AppOrchestrator : IDisposable
 
         FileLogger.Info($"Silence detected — splitting audio chunk ({chunk.Length} bytes) for background transcription");
 
-        Interlocked.Increment(ref _activeChunkTasks);
+        var task = TranscribeChunkAsync(chunk);
+        lock (_chunkTasks) { _chunkTasks.Add(task); }
+    }
 
+    private async Task TranscribeChunkAsync(MemoryStream chunk)
+    {
         try
         {
             var provider = _sttFactory.Create();
@@ -329,11 +345,6 @@ public class AppOrchestrator : IDisposable
             FileLogger.Error("Chunk transcription failed", ex);
             chunk.Dispose();
         }
-        finally
-        {
-            if (Interlocked.Decrement(ref _activeChunkTasks) == 0)
-                _chunksDone.Release();
-        }
     }
 
     private async Task StopAndTranscribeAsync()
@@ -358,31 +369,68 @@ public class AppOrchestrator : IDisposable
         string targetWindow = GetWindowName(_recordingStartWindowHwnd);
         FileLogger.Info($"Target window: {targetWindow}");
 
-        // Check if audio is too short — need at least ~0.8s of audio (16kHz * 2 bytes * 0.8s = 25600)
-        if (audioStream.Length <= 44 + 25600)
+        // Calculate audio duration from stream size: (bytes - 44 header) / (sampleRate * bytesPerSample)
+        double audioDurationMs = (audioStream.Length - 44) / (16000.0 * 2) * 1000;
+        FileLogger.Info($"Audio duration: {audioDurationMs:F0} ms");
+
+        // Skip short final segments based on user setting (default: skip if < 250 ms).
+        // IMPORTANT: even if the final segment is too short, we may have chunks already
+        // transcribed from silence splits that we still want to output. Only bail out
+        // entirely if there are no chunks and no in-flight chunk tasks.
+        int minDurationMs = _settings.Current.SkipShortRecordings ? _settings.Current.MinRecordingDurationMs : 0;
+        bool finalTooShort = audioDurationMs < minDurationMs;
+        if (finalTooShort)
         {
+            int pendingChunks;
+            int completedChunks;
+            lock (_chunkResults) { completedChunks = _chunkResults.Count; }
+            lock (_chunkTasks) { pendingChunks = _chunkTasks.Count(t => !t.IsCompleted); }
+
+            if (completedChunks == 0 && pendingChunks == 0)
+            {
+                audioStream.Dispose();
+                FileLogger.Info($"Recording too short ({audioDurationMs:F0} ms < {minDurationMs} ms) and no chunks, skipping.");
+                _notifications.ShowInfo("Recording too short.");
+                _selectedPromptIndex = -1;
+                PromptChanged?.Invoke(this, null);
+                SetState(AppState.Idle);
+                return;
+            }
+
+            FileLogger.Info($"Final segment too short ({audioDurationMs:F0} ms) but have {completedChunks} completed + {pendingChunks} pending chunks — keeping them.");
             audioStream.Dispose();
-            FileLogger.Info($"Recording too short ({audioStream.Length} bytes), skipping transcription.");
-            _notifications.ShowInfo("Recording too short.");
-            _selectedPromptIndex = -1;
-            SetState(AppState.Idle);
-            return;
+            audioStream = new MemoryStream(); // empty stream; we'll skip STT for the final segment
         }
 
         SttResult? result = null;
+        if (finalTooShort)
+        {
+            // Use an empty silence result — actual text comes from accumulated chunks
+            // Confidence=1.0 (we're certain it's empty), NoSpeechProbability=1.0 (treated as silence)
+            result = new SttResult("", "", TimeSpan.Zero, 1.0, 1.0);
+        }
+        else
         try
         {
             var sttConfig = _settings.Current.SttProvider;
             FileLogger.Info($"Sending to STT: provider={sttConfig.ProviderType}, model={sttConfig.Model}, audioSize={audioStream.Length}");
             var provider = _sttFactory.Create();
 
-            result = await provider.TranscribeAsync(
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var transcribeTask = provider.TranscribeAsync(
                 audioStream,
                 _settings.Current.LanguageHint);
 
+            var completed = await Task.WhenAny(transcribeTask, Task.Delay(-1, cts.Token));
+            if (completed != transcribeTask)
+            {
+                throw new TimeoutException("Transcription timed out after 30 seconds");
+            }
+            result = await transcribeTask;
+
             FileLogger.Info($"Transcription OK: lang={result.DetectedLanguage}, text=\"{result.Text}\", duration={result.Duration.TotalSeconds:F1}s, noSpeech={result.NoSpeechProbability:F3}");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             FileLogger.Error("Transcription failed", ex);
             _notifications.ShowError($"Transcription failed: {ex.Message}");
@@ -406,11 +454,14 @@ public class AppOrchestrator : IDisposable
             audioStream.Dispose();
         }
 
-        // Wait for any in-flight chunk transcriptions to complete (signal-based, no polling)
-        if (_activeChunkTasks > 0)
+        // Wait for all in-flight chunk transcriptions to complete
+        Task[] pending;
+        lock (_chunkTasks) { pending = _chunkTasks.ToArray(); }
+        if (pending.Length > 0)
         {
-            FileLogger.Info($"Waiting for {_activeChunkTasks} chunk transcription(s)...");
-            await _chunksDone.WaitAsync();
+            int remaining = pending.Count(t => !t.IsCompleted);
+            FileLogger.Info($"Waiting for {remaining} of {pending.Length} chunk transcription(s)...");
+            await Task.WhenAll(pending);
         }
 
         // Check if final segment is silence/noise (Whisper hallucinates Korean/Japanese on silence)

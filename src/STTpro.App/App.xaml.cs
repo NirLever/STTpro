@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using STTpro.App.Theme;
 using STTpro.App.Views;
 using STTpro.Core;
 using STTpro.Core.Audio;
@@ -26,11 +29,22 @@ public partial class App : Application
     private RecordingBorderOverlay? _borderOverlay;
     private PromptToast? _promptToast;
     private SettingsWindow? _settingsWindow;
+    private INotificationService? _notifications;
+
+    private static bool _isRestarting;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
         FileLogger.Info("=== STTpro starting ===");
+
+        // Apply the light/dark palette from the Windows system setting before any window loads.
+        ThemeManager.Initialize();
+
+        // Global exception handlers to prevent silent crashes
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
         // Single-instance enforcement
         bool mutexAcquired = false;
@@ -69,8 +83,8 @@ public partial class App : Application
         SetupTrayIcon();
 
         // Wire tray icon to notification service for balloon tips
-        var notificationService = _serviceProvider.GetRequiredService<INotificationService>();
-        if (notificationService is TrayNotificationService tns)
+        _notifications = _serviceProvider.GetRequiredService<INotificationService>();
+        if (_notifications is TrayNotificationService tns)
             tns.SetTrayIcon(_trayIcon!);
 
         try
@@ -275,6 +289,7 @@ public partial class App : Application
 
         _settingsWindow = new SettingsWindow(settings, credStore, audio, hotkeyService, history);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        ThemeManager.RegisterWindow(_settingsWindow);
         _settingsWindow.Show();
         _settingsWindow.Activate();
     }
@@ -286,6 +301,7 @@ public partial class App : Application
         var settings = _serviceProvider!.GetRequiredService<ISettingsService>();
 
         var window = new HistoryWindow(history, output, settings);
+        ThemeManager.RegisterWindow(window);
         window.Show();
     }
 
@@ -303,6 +319,77 @@ public partial class App : Application
         _promptToast?.Close();
         _serviceProvider?.Dispose();
         Shutdown();
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        FileLogger.Error("Unhandled dispatcher exception", e.Exception);
+        e.Handled = true; // Prevent crash for recoverable UI exceptions
+
+        try
+        {
+            _notifications?.ShowError($"Unexpected error: {e.Exception.Message}");
+        }
+        catch { /* notification service may itself be broken */ }
+
+        // If the app is in a bad state (e.g. recording stuck), reset to idle
+        try
+        {
+            if (_orchestrator?.State != AppState.Idle)
+            {
+                FileLogger.Info("Resetting orchestrator to Idle after unhandled exception");
+                _orchestrator?.CancelRecordingFromUI();
+            }
+        }
+        catch (Exception ex)
+        {
+            FileLogger.Error("Failed to reset state after exception", ex);
+        }
+    }
+
+    private void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        var ex = e.ExceptionObject as Exception ?? new Exception(e.ExceptionObject?.ToString() ?? "Unknown fatal error");
+        FileLogger.Error($"Fatal unhandled exception (terminating={e.IsTerminating})", ex);
+
+        if (e.IsTerminating)
+        {
+            RestartApp();
+        }
+    }
+
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        FileLogger.Error("Unobserved task exception", e.Exception);
+        e.SetObserved(); // Prevent process termination from background task failures
+    }
+
+    private static void RestartApp()
+    {
+        if (_isRestarting) return;
+        _isRestarting = true;
+
+        try
+        {
+            var exePath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exePath))
+            {
+                FileLogger.Info($"Auto-restarting STTpro: {exePath}");
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = exePath,
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                FileLogger.Error("Cannot restart: unable to determine executable path", new InvalidOperationException("ProcessPath is null"));
+            }
+        }
+        catch (Exception ex)
+        {
+            FileLogger.Error("Failed to restart app", ex);
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

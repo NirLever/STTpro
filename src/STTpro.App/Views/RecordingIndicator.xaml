@@ -13,14 +13,14 @@
         <!-- Light-themed pill indicator -->
         <Border x:Name="PillBorder"
                 CornerRadius="22"
-                Background="#F0FFFFFF"
-                BorderBrush="#40000000"
+                Background="{DynamicResource BgElevated}"
+                BorderBrush="{DynamicResource BorderColor}"
                 BorderThickness="1"
                 Padding="14,6,10,6"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="2" Opacity="0.2"/>
+                <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="2" Opacity="0.28"/>
             </Border.Effect>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <!-- Pulsing red dot -->
@@ -50,7 +50,7 @@
                 <!-- Timer text -->
                 <TextBlock x:Name="TimerText"
                            Text="0:00"
-                           Foreground="#FF1D1D1F"
+                           Foreground="{DynamicResource TextPrimary}"
                            FontSize="14"
                            FontFamily="Segoe UI"
                            FontWeight="SemiBold"
@@ -58,7 +58,7 @@
                 <!-- Prompt indicator -->
                 <TextBlock x:Name="PromptLabel"
                            Text=""
-                           Foreground="#FF007AFF"
+                           Foreground="{DynamicResource AccentBlue}"
                            FontSize="11"
                            FontFamily="Segoe UI"
                            FontWeight="Medium"
@@ -71,7 +71,7 @@
                         Width="22" Height="22" VerticalAlignment="Center"
                         MouseLeftButtonDown="StopBtn_Click"
                         ToolTip="Stop and transcribe">
-                    <Rectangle Width="9" Height="9" Fill="#FF555555"
+                    <Rectangle Width="9" Height="9" Fill="{DynamicResource TextSecondary}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                RadiusX="1" RadiusY="1"/>
                 </Border>
@@ -83,7 +83,7 @@
                         MouseLeftButtonDown="CancelBtn_Click"
                         ToolTip="Cancel and discard">
                     <TextBlock Text="&#xd7;" FontSize="15"
-                               Foreground="#FF999999"
+                               Foreground="{DynamicResource TextMuted}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="0,-2,0,0"/>
                 </Border>
