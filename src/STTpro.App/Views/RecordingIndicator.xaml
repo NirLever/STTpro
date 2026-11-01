@@ -55,6 +55,42 @@
                            FontFamily="Segoe UI"
                            FontWeight="SemiBold"
                            VerticalAlignment="Center"/>
+                <!-- Live audio waveform (bars driven by mic level) -->
+
+                <StackPanel x:Name="WavePanel" Orientation="Horizontal" VerticalAlignment="Center"
+
+                            Margin="10,0,2,0" Height="22">
+
+                    <Rectangle x:Name="Bar0" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar1" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar2" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar3" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar4" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar5" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar6" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar7" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar8" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                    <Rectangle x:Name="Bar9" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5" Margin="1.5,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBlue}"/>
+
+                </StackPanel>
+
+                <!-- Shown when the mic delivers no signal (muted / wrong device) -->
+
+                <TextBlock x:Name="NoSignalWarning" Text="no mic signal" Visibility="Collapsed"
+
+                           Foreground="{DynamicResource AccentOrange}" FontSize="10.5" FontWeight="SemiBold"
+
+                           VerticalAlignment="Center" Margin="8,0,0,0"/>
+
                 <!-- Prompt indicator -->
                 <TextBlock x:Name="PromptLabel"
                            Text=""

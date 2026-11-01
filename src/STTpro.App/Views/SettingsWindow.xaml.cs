@@ -47,6 +47,30 @@ public partial class SettingsWindow : Window
 
         // Wire up search box enter key
         HistorySearchBox.KeyUp += (_, e) => { if (e.Key == Key.Enter) _ = SearchHistoryAsync(); };
+
+        // An armed hotkey capture swallows every keystroke, so abandon it as soon as the user
+        // clicks somewhere else or leaves the window — otherwise the rest of the UI (prompt
+        // name/text boxes) appears frozen.
+        Deactivated += (_, _) => CancelCapture();
+        PreviewMouseDown += (_, e) =>
+        {
+            if (_capturingButton == null) return;
+            if (e.OriginalSource is DependencyObject src && IsWithin(src, _capturingButton)) return;
+            CancelCapture();
+        };
+    }
+
+    /// <summary>True if <paramref name="node"/> is <paramref name="ancestor"/> or sits under it.</summary>
+    private static bool IsWithin(DependencyObject? node, DependencyObject ancestor)
+    {
+        while (node != null)
+        {
+            if (ReferenceEquals(node, ancestor)) return true;
+            node = node is System.Windows.Media.Visual
+                ? System.Windows.Media.VisualTreeHelper.GetParent(node)
+                : LogicalTreeHelper.GetParent(node);
+        }
+        return false;
     }
 
     private void LoadSettings()
@@ -67,10 +91,15 @@ public partial class SettingsWindow : Window
         MicrophoneCombo.Items.Clear();
         foreach (var dev in devices)
             MicrophoneCombo.Items.Add(new ComboBoxItem { Content = dev.Name, Tag = dev.Index });
-        if (s.SelectedMicrophoneIndex >= 0 && s.SelectedMicrophoneIndex < devices.Count)
-            MicrophoneCombo.SelectedIndex = s.SelectedMicrophoneIndex;
-        else if (devices.Count > 0)
-            MicrophoneCombo.SelectedIndex = 0;
+        // Prefer the saved NAME (indices shift when devices are added/removed).
+        int micSel = -1;
+        if (!string.IsNullOrWhiteSpace(s.SelectedMicrophoneId))
+            micSel = devices.ToList().FindIndex(d => d.Name.Trim().StartsWith(s.SelectedMicrophoneId.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                  || s.SelectedMicrophoneId.Trim().StartsWith(d.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (micSel < 0 && s.SelectedMicrophoneIndex >= 0 && s.SelectedMicrophoneIndex < devices.Count)
+            micSel = s.SelectedMicrophoneIndex;
+        if (micSel < 0 && devices.Count > 0) micSel = 0;
+        if (micSel >= 0) MicrophoneCombo.SelectedIndex = micSel;
 
         // Output mode
         SelectComboByTag(OutputModeCombo, s.OutputMode);
@@ -96,6 +125,7 @@ public partial class SettingsWindow : Window
 
         // History retention
         SelectComboByTag(HistoryRetentionCombo, s.MaxHistoryItems.ToString());
+        SelectComboByTag(AppearanceCombo, string.IsNullOrEmpty(s.ThemeMode) ? "system" : s.ThemeMode);
     }
 
     // --- Model descriptions (shown as tooltips in dropdowns) ---
@@ -524,8 +554,10 @@ public partial class SettingsWindow : Window
 
     private void StartCapture(Button btn, string target)
     {
-        if (_capturingButton != null && _capturingButton != btn)
-            CancelCapture();
+        // Always tear down any in-flight capture first — including a repeat click on the
+        // SAME button, which would otherwise double-subscribe the key handlers and leave a
+        // stale one swallowing every keystroke in the window.
+        CancelCapture();
 
         _capturingButton = btn;
         _capturingTarget = target;
@@ -537,16 +569,34 @@ public partial class SettingsWindow : Window
 
         _hotkeyService?.Pause();
 
+        HookCapture();
+    }
+
+    /// <summary>Subscribe the capture handlers exactly once.</summary>
+    private void HookCapture()
+    {
+        UnhookCapture();
         PreviewKeyDown += OnCaptureKeyDown;
         PreviewKeyUp += OnCaptureKeyUp;
     }
 
-    private void CancelCapture()
+    private void UnhookCapture()
     {
-        if (_capturingButton == null) return;
-
         PreviewKeyDown -= OnCaptureKeyDown;
         PreviewKeyUp -= OnCaptureKeyUp;
+    }
+
+    private void CancelCapture()
+    {
+        // Unhook unconditionally so a stale subscription can never survive.
+        UnhookCapture();
+
+        if (_capturingButton == null)
+        {
+            _capturingTarget = null;
+            _capturingPromptIndex = -1;
+            return;
+        }
 
         var s = _settings.Current;
         switch (_capturingTarget)
@@ -573,6 +623,14 @@ public partial class SettingsWindow : Window
 
     private void OnCaptureKeyDown(object sender, KeyEventArgs e)
     {
+        // Defensive: if we're not capturing, this is a stale subscription. Detach and let the
+        // key through rather than swallowing it (this is what made text boxes uneditable).
+        if (_capturingButton == null)
+        {
+            UnhookCapture();
+            return;
+        }
+
         e.Handled = true;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
 
@@ -598,6 +656,11 @@ public partial class SettingsWindow : Window
 
     private void OnCaptureKeyUp(object sender, KeyEventArgs e)
     {
+        if (_capturingButton == null)
+        {
+            UnhookCapture();
+            return;
+        }
         e.Handled = true;
     }
 
@@ -642,7 +705,14 @@ public partial class SettingsWindow : Window
 
     private async void ConfirmCapture()
     {
-        if (_capturingButton == null || _capturingTarget == null) return;
+        if (_capturingButton == null || _capturingTarget == null)
+        {
+            UnhookCapture();
+            return;
+        }
+
+        // Detach before any await so keystrokes are never swallowed mid-save.
+        UnhookCapture();
 
         var displayName = BuildDisplayName(_capturedModifiers,
             KeyInterop.KeyFromVirtualKey((int)_capturedKeyCode));
@@ -674,10 +744,6 @@ public partial class SettingsWindow : Window
 
         await _settings.SaveAsync();
 
-        // Unhook capture handlers BEFORE resuming hotkeys
-        PreviewKeyDown -= OnCaptureKeyDown;
-        PreviewKeyUp -= OnCaptureKeyUp;
-
         // Re-register all hotkeys with updated settings
         if (_hotkeyService != null)
         {
@@ -708,6 +774,8 @@ public partial class SettingsWindow : Window
     {
         if (_loading || MicrophoneCombo.SelectedItem is not ComboBoxItem item) return;
         _settings.Current.SelectedMicrophoneIndex = (int)item.Tag;
+        // Persist the name too — it is what survives index reshuffles.
+        _settings.Current.SelectedMicrophoneId = item.Content?.ToString() ?? "";
         await _settings.SaveAsync();
     }
 
@@ -723,6 +791,15 @@ public partial class SettingsWindow : Window
         if (_loading || LanguageCombo.SelectedItem is not ComboBoxItem item) return;
         var lang = (string)item.Tag;
         _settings.Current.LanguageHint = string.IsNullOrEmpty(lang) ? null : lang;
+        await _settings.SaveAsync();
+    }
+
+    private async void Appearance_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || AppearanceCombo.SelectedItem is not ComboBoxItem item) return;
+        var mode = (string)item.Tag;
+        _settings.Current.ThemeMode = mode;
+        Theme.ThemeManager.SetMode(mode);
         await _settings.SaveAsync();
     }
 
@@ -824,8 +901,8 @@ public partial class SettingsWindow : Window
 
     private void StartPromptHotkeyCapture(Button btn, int promptIndex)
     {
-        if (_capturingButton != null && _capturingButton != btn)
-            CancelCapture();
+        // See StartCapture: cancel unconditionally so repeat clicks can't double-subscribe.
+        CancelCapture();
 
         _capturingButton = btn;
         _capturingTarget = "prompt";
@@ -838,8 +915,7 @@ public partial class SettingsWindow : Window
 
         _hotkeyService?.Pause();
 
-        PreviewKeyDown += OnCaptureKeyDown;
-        PreviewKeyUp += OnCaptureKeyUp;
+        HookCapture();
     }
 
     private void RenderPromptList()

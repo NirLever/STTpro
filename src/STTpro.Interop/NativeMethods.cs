@@ -112,6 +112,11 @@ public static class NativeMethods
 
     // Modifier flags for RegisterHotKey
     public const uint MOD_ALT = 0x0001;
+    // --- Clipboard ---
+    /// <summary>Increments every time any app changes the clipboard.</summary>
+    [DllImport("user32.dll")]
+    public static extern uint GetClipboardSequenceNumber();
+
     public const uint MOD_CONTROL = 0x0002;
     public const uint MOD_SHIFT = 0x0004;
     public const uint MOD_WIN = 0x0008;

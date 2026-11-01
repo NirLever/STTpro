@@ -234,7 +234,7 @@
                         <Border Style="{StaticResource Card}">
                             <StackPanel>
                                 <TextBlock Text="HOTKEYS" Style="{StaticResource SectionLabel}"/>
-                                <TextBlock Text="Click a hotkey to rebind it. Press the new key combination, then Enter to confirm or Escape to cancel."
+                                <TextBlock Text="Click a hotkey, then hold your modifiers (Ctrl / Shift / Alt / Win) and press the final key — e.g. Ctrl + Shift + M. It saves automatically. Press Escape or click away to cancel."
                                            Style="{StaticResource HintLabel}" Margin="0,-4,0,12"/>
 
                                 <Grid Margin="0,0,0,8">
@@ -318,8 +318,15 @@
                                     </ComboBox>
                                 </StackPanel>
 
-                                <TextBlock Text="Appearance follows your Windows light / dark setting automatically."
-                                           Style="{StaticResource HintLabel}" Margin="0,12,0,0" FontStyle="Italic"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                    <TextBlock Text="Appearance:" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,8,0"/>
+                                    <ComboBox x:Name="AppearanceCombo" SelectionChanged="Appearance_Changed" Width="190">
+                                        <ComboBoxItem Content="Follow Windows" Tag="system"/>
+                                        <ComboBoxItem Content="Light" Tag="light"/>
+                                        <ComboBoxItem Content="Dark" Tag="dark"/>
+                                    </ComboBox>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 

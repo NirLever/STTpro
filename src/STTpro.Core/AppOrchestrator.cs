@@ -108,10 +108,11 @@ public class AppOrchestrator : IDisposable
         if (_audio is NAudioCaptureService nAudio)
             nAudio.Configure(s.PreRollMs);
 
-        // Default to device 0 if none selected
-        int micIndex = s.SelectedMicrophoneIndex >= 0 ? s.SelectedMicrophoneIndex : 0;
+        // Resolve by NAME first: WaveIn indices shift whenever an input device is added or
+        // removed (e.g. a monitor/webcam mic appearing), so a stored index can silently start
+        // pointing at a different microphone.
+        int micIndex = ResolveMicrophoneIndex(s);
         _audio.SelectDevice(micIndex);
-        FileLogger.Info($"Using microphone device index: {micIndex}");
 
         // Start listening (fills pre-roll buffer)
         try
@@ -301,6 +302,70 @@ public class AppOrchestrator : IDisposable
             FileLogger.Error("Failed to start recording", ex);
             _notifications.ShowError($"Recording error: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Picks the microphone to capture from. Prefers matching the saved device NAME, because
+    /// WaveIn indices are reassigned whenever input devices come and go. Falls back to the
+    /// saved index, then to device 0.
+    /// </summary>
+    private int ResolveMicrophoneIndex(AppSettings s)
+    {
+        IReadOnlyList<AudioDevice> devices;
+        try
+        {
+            devices = _audio.GetInputDevices();
+        }
+        catch (Exception ex)
+        {
+            FileLogger.Error("Failed to enumerate input devices", ex);
+            return Math.Max(0, s.SelectedMicrophoneIndex);
+        }
+
+        if (devices.Count == 0)
+        {
+            FileLogger.Error("No audio input devices found", new InvalidOperationException("DeviceCount == 0"));
+            _notifications.ShowError("No microphone found.");
+            return 0;
+        }
+
+        var savedName = s.SelectedMicrophoneId;
+        if (!string.IsNullOrWhiteSpace(savedName))
+        {
+            foreach (var d in devices)
+            {
+                if (NamesMatch(d.Name, savedName))
+                {
+                    FileLogger.Info($"Using microphone '{d.Name}' (index {d.Index}, matched by name).");
+                    return d.Index;
+                }
+            }
+            FileLogger.Info($"Saved microphone '{savedName}' not connected; falling back.");
+        }
+
+        if (s.SelectedMicrophoneIndex >= 0 && s.SelectedMicrophoneIndex < devices.Count)
+        {
+            var d = devices[s.SelectedMicrophoneIndex];
+            FileLogger.Info($"Using microphone '{d.Name}' (index {d.Index}, by saved index).");
+            return d.Index;
+        }
+
+        FileLogger.Info($"Using microphone '{devices[0].Name}' (index 0, default).");
+        return 0;
+    }
+
+    /// <summary>
+    /// Compares device names tolerantly. The MME API truncates product names to 31 chars,
+    /// so a saved full name and the enumerated name may differ by a trailing cut.
+    /// </summary>
+    private static bool NamesMatch(string a, string b)
+    {
+        a = a.Trim();
+        b = b.Trim();
+        if (a.Equals(b, StringComparison.OrdinalIgnoreCase)) return true;
+        var shorter = a.Length <= b.Length ? a : b;
+        var longer = a.Length <= b.Length ? b : a;
+        return shorter.Length >= 8 && longer.StartsWith(shorter, StringComparison.OrdinalIgnoreCase);
     }
 
     private void OnSilenceDetected(object? sender, EventArgs e)

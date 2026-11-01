@@ -18,16 +18,30 @@ public static class ThemeManager
 
     private static readonly HashSet<Window> Windows = new();
     private static bool _isDark;
+    private static string _mode = "system"; // "system" | "light" | "dark"
 
     /// <summary>True when the dark palette is currently active.</summary>
     public static bool IsDark => _isDark;
 
-    /// <summary>Read the current Windows apps theme and apply it. Call once at startup.</summary>
-    public static void Initialize()
+    /// <summary>Apply the saved appearance mode. Call once at startup.</summary>
+    public static void Initialize(string mode)
     {
+        _mode = Normalize(mode);
         Apply(ShouldUseDark());
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
     }
+
+    /// <summary>Change the appearance mode at runtime (from the Settings combo).</summary>
+    public static void SetMode(string mode)
+    {
+        _mode = Normalize(mode);
+        var dark = ShouldUseDark();
+        if (dark != _isDark)
+            Apply(dark);
+    }
+
+    private static string Normalize(string? mode) =>
+        mode is "light" or "dark" ? mode : "system";
 
     /// <summary>Register a window so it gets a matching title bar now and on theme changes.</summary>
     public static void RegisterWindow(Window window)
@@ -74,6 +88,9 @@ public static class ThemeManager
 
     private static bool ShouldUseDark()
     {
+        if (_mode == "light") return false;
+        if (_mode == "dark") return true;
+        // "system": read the Windows apps theme.
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(

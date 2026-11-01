@@ -123,6 +123,12 @@ public class AppSettings
     };
 
     public bool LaunchOnStartup { get; set; }
+
+    /// <summary>
+    /// UI appearance: "system" (follow Windows), "light", or "dark".
+    /// </summary>
+    public string ThemeMode { get; set; } = "system";
+
     public bool ShowRecordingIndicator { get; set; } = true;
     public bool PlaySoundCues { get; set; } = true;
     public int PreRollMs { get; set; } = 300;

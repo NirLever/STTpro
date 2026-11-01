@@ -30,6 +30,7 @@ public partial class App : Application
     private PromptToast? _promptToast;
     private SettingsWindow? _settingsWindow;
     private INotificationService? _notifications;
+    private volatile bool _indicatorVisible;
 
     private static bool _isRestarting;
 
@@ -37,9 +38,6 @@ public partial class App : Application
     {
         base.OnStartup(e);
         FileLogger.Info("=== STTpro starting ===");
-
-        // Apply the light/dark palette from the Windows system setting before any window loads.
-        ThemeManager.Initialize();
 
         // Global exception handlers to prevent silent crashes
         DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -79,6 +77,10 @@ public partial class App : Application
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
 
+        // Apply the saved appearance (system/light/dark) before any window or overlay is created.
+        var themeSettings = _serviceProvider.GetRequiredService<ISettingsService>();
+        ThemeManager.Initialize(themeSettings.Current.ThemeMode);
+
         // Create tray icon using WinForms NotifyIcon (most reliable on Windows)
         SetupTrayIcon();
 
@@ -95,6 +97,17 @@ public partial class App : Application
             _recordingIndicator.CancelRequested += (_, _) => _orchestrator?.CancelRecordingFromUI();
             _borderOverlay = new RecordingBorderOverlay();
             _promptToast = new PromptToast();
+
+            // Drive the indicator waveform from live mic levels.
+            var capture = _serviceProvider.GetRequiredService<IAudioCaptureService>();
+            capture.LevelChanged += (_, level) =>
+            {
+                var ind = _recordingIndicator;
+                if (ind == null) return;
+                // Only marshal to the UI thread while the indicator is actually on screen.
+                if (!_indicatorVisible) return;
+                ind.Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() => ind.SetLevel(level)));
+            };
             FileLogger.Info("UI overlays created");
 
             // Initialize orchestrator
@@ -117,6 +130,13 @@ public partial class App : Application
         {
             FileLogger.Error("Initialization failed", ex);
             MessageBox.Show($"Initialization error: {ex.Message}", "STTpro", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        // Open Settings straight away when asked (e.g. a "STTpro Settings" shortcut).
+        if (e.Args.Any(a => string.Equals(a, "--settings", StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowSettings();
+            return;
         }
 
         // Auto-show settings on first launch if no API key configured for STT provider
@@ -234,11 +254,13 @@ public partial class App : Application
                     if (_trayIcon != null) _trayIcon.Text = "STTpro - Recording...";
                     var hwnd = _orchestrator?.RecordingTargetHwnd ?? IntPtr.Zero;
                     _recordingIndicator?.ShowForWindow(hwnd);
+                    _indicatorVisible = true;
                     break;
                 case AppState.Transcribing:
                     if (_trayIcon != null) _trayIcon.Text = "STTpro - Transcribing...";
                     // Keep indicator visible but change to "processing" mode
                     _borderOverlay?.Hide();
+                    _indicatorVisible = false;
                     _recordingIndicator?.SetPromptLabel("Transcribing...");
                     break;
                 case AppState.PostProcessing:
@@ -247,6 +269,7 @@ public partial class App : Application
                     break;
                 case AppState.Idle:
                     if (_trayIcon != null) _trayIcon.Text = "STTpro - Speech to Text";
+                    _indicatorVisible = false;
                     _recordingIndicator?.Hide();
                     _borderOverlay?.Hide();
                     break;
