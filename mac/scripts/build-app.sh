@@ -48,10 +48,16 @@ cp "$BIN" "$APP/Contents/MacOS/STTpro"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
+LOCAL_CERT="STTpro Local Code Signing"
+if [[ -z "${SIGN_IDENTITY:-}" ]] && security find-identity -v -p codesigning 2>/dev/null | grep -q "$LOCAL_CERT"; then
+  SIGN_IDENTITY="$LOCAL_CERT"
+fi
 IDENTITY="${SIGN_IDENTITY:--}"
 echo "==> Signing (${IDENTITY})"
 if [[ "$IDENTITY" == "-" ]]; then
   codesign --force --sign - --identifier com.sttpro.mac "$APP"
+  echo "    note: ad-hoc signature changes every build, so macOS forgets the Accessibility"
+  echo "    permission after each rebuild. Run scripts/create-signing-cert.sh once to fix that."
 else
   codesign --force --sign "$IDENTITY" --identifier com.sttpro.mac \
     --options runtime --entitlements "$ROOT/Resources/STTpro.entitlements" "$APP"
