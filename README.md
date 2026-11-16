@@ -64,7 +64,7 @@ cd mac
 scripts/build-app.sh            # builds mac/build/STTpro.app
 scripts/build-app.sh --install  # also copies it to /Applications (needed for "Launch at login")
 open build/STTpro.app
-swift test                      # unit tests for providers, punctuation, history
+swift run STTproCoreChecks       # unit checks: providers, punctuation, history (no Xcode needed)
 ```
 
 The script uses `xcodebuild` when full Xcode is installed (or `BUILD_TOOL=xcodebuild`) and SwiftPM otherwise. You can also open `mac/Package.swift` in Xcode.

@@ -29,10 +29,12 @@ let package = Package(
                 .linkedFramework("ServiceManagement"),
             ]
         ),
-        .testTarget(
-            name: "STTproCoreTests",
+        // Unit checks as a plain executable: `swift run STTproCoreChecks`.
+        // (swift-testing/XCTest need full Xcode; this runs with the CLT too.)
+        .executableTarget(
+            name: "STTproCoreChecks",
             dependencies: ["STTproCore"],
-            path: "Tests/STTproCoreTests"
+            path: "Tests/STTproCoreChecks"
         ),
     ]
 )
