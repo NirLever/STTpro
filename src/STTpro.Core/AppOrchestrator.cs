@@ -46,6 +46,8 @@ public class AppOrchestrator : IDisposable
     private DateTime _stateSinceUtc = DateTime.UtcNow;
     private System.Threading.Timer? _watchdog;
 
+    // Chunks whose transcription failed outright; used to warn that the paste is incomplete.
+    private int _chunkFailures;
     private readonly List<string> _chunkResults = new();
     private readonly List<Task> _chunkTasks = new();
 
@@ -312,6 +314,7 @@ public class AppOrchestrator : IDisposable
             FileLogger.Info($"Captured target window: 0x{_recordingStartWindowHwnd:X} ({GetWindowName(_recordingStartWindowHwnd)})");
 
             // Clear chunk state
+            _chunkFailures = 0;
             lock (_chunkResults) { _chunkResults.Clear(); }
             lock (_chunkTasks) { _chunkTasks.Clear(); }
 
@@ -402,33 +405,56 @@ public class AppOrchestrator : IDisposable
         lock (_chunkTasks) { _chunkTasks.Add(task); }
     }
 
+    /// <summary>
+    /// Transcribes one silence-split chunk. Chunks are the user's actual words, so a transient
+    /// failure must not silently drop them — previously one failed request meant that part of
+    /// the dictation vanished and only the final segment got pasted.
+    /// </summary>
     private async Task TranscribeChunkAsync(MemoryStream chunk)
     {
+        const int maxAttempts = 3;
         try
         {
-            var provider = _sttFactory.Create();
-
-            var result = await provider.TranscribeAsync(chunk, _settings.Current.LanguageHint);
-            chunk.Dispose();
-
-            // Filter silence hallucinations in chunks too
-            if (result.NoSpeechProbability > _settings.Current.SilenceThreshold)
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                FileLogger.Info($"Chunk skipped: no_speech_prob={result.NoSpeechProbability:F3} (silence/noise)");
-            }
-            else if (!string.IsNullOrWhiteSpace(result.Text))
-            {
-                var processed = Stt.PunctuationReplacer.Apply(result.Text);
-                lock (_chunkResults)
+                try
                 {
-                    _chunkResults.Add(processed);
+                    chunk.Position = 0; // rewind so a retry re-sends the same audio
+                    var provider = _sttFactory.Create();
+                    var result = await provider.TranscribeAsync(chunk, _settings.Current.LanguageHint);
+
+                    // Filter silence hallucinations in chunks too
+                    if (result.NoSpeechProbability > _settings.Current.SilenceThreshold)
+                    {
+                        FileLogger.Info($"Chunk skipped: no_speech_prob={result.NoSpeechProbability:F3} (silence/noise)");
+                    }
+                    else if (!string.IsNullOrWhiteSpace(result.Text))
+                    {
+                        var processed = Stt.PunctuationReplacer.Apply(result.Text);
+                        lock (_chunkResults)
+                        {
+                            _chunkResults.Add(processed);
+                        }
+                        FileLogger.Info($"Chunk transcription complete: \"{processed}\"");
+                    }
+                    return; // success
                 }
-                FileLogger.Info($"Chunk transcription complete: \"{processed}\"");
+                catch (Exception ex) when (attempt < maxAttempts)
+                {
+                    FileLogger.Info($"Chunk transcription attempt {attempt}/{maxAttempts} failed ({ex.GetType().Name}) — retrying.");
+                    await Task.Delay(250 * attempt);
+                }
             }
         }
         catch (Exception ex)
         {
-            FileLogger.Error("Chunk transcription failed", ex);
+            // All attempts failed: this part of the recording is lost. Count it so the user
+            // is told the paste is incomplete instead of silently getting only the last part.
+            System.Threading.Interlocked.Increment(ref _chunkFailures);
+            FileLogger.Error($"Chunk transcription failed after {maxAttempts} attempts — part of this recording is missing", ex);
+        }
+        finally
+        {
             chunk.Dispose();
         }
     }
@@ -608,6 +634,16 @@ public class AppOrchestrator : IDisposable
             {
                 combinedText = result.Text;
             }
+        }
+
+        int lostParts = System.Threading.Volatile.Read(ref _chunkFailures);
+        if (lostParts > 0)
+        {
+            FileLogger.Error($"{lostParts} chunk(s) of this recording never transcribed — the pasted text is incomplete.",
+                new InvalidOperationException("Chunk loss"));
+            _notifications.ShowError(lostParts == 1
+                ? "Part of that recording failed to transcribe — some words are missing."
+                : $"{lostParts} parts of that recording failed to transcribe — some words are missing.");
         }
 
         result = result with { Text = combinedText };

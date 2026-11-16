@@ -20,6 +20,38 @@ public class TextOutputService : ITextOutputService
     private const int PasteSettleMs = 350;
 
     /// <summary>
+    /// Hard ceiling on any single clipboard operation. Each WPF clipboard call blocks for
+    /// about a second internally before failing, so the old "8 attempts" loops could burn
+    /// 8s each — a capture plus a restore cost ~16s per transcription when another process
+    /// held the clipboard. Dictation has to stay interactive, so we give up quickly and
+    /// type the text instead.
+    /// </summary>
+    private const int ClipboardBudgetMs = 900;
+
+    // When the clipboard proves unusable we stop paying the retry cost on every paste and
+    // type directly for a while, then try the clipboard again.
+    private static int _consecutiveClipboardFailures;
+    private static DateTime _clipboardBypassUntilUtc = DateTime.MinValue;
+    private const int ClipboardFailuresBeforeBypass = 2;
+    private const int ClipboardBypassSeconds = 60;
+
+    private static bool ClipboardLooksUnusable => DateTime.UtcNow < _clipboardBypassUntilUtc;
+
+    private static void NoteClipboardFailure()
+    {
+        if (++_consecutiveClipboardFailures >= ClipboardFailuresBeforeBypass
+            && DateTime.UtcNow >= _clipboardBypassUntilUtc)
+        {
+            _clipboardBypassUntilUtc = DateTime.UtcNow.AddSeconds(ClipboardBypassSeconds);
+            FileLogger.Error($"Clipboard unusable {_consecutiveClipboardFailures}x in a row - typing directly " +
+                             $"for the next {ClipboardBypassSeconds}s instead of retrying every paste.",
+                new InvalidOperationException("Clipboard contention"));
+        }
+    }
+
+    private static void NoteClipboardSuccess() => _consecutiveClipboardFailures = 0;
+
+    /// <summary>
     /// Registered clipboard format telling Windows clipboard history (Win+V), cloud
     /// clipboard and clipboard managers to ignore an entry. Put on the transient
     /// transcript and on the restored copy, so dictating leaves history untouched.
@@ -112,6 +144,13 @@ public class TextOutputService : ITextOutputService
     /// </summary>
     private async Task ClipboardPasteAsync(string text)
     {
+        if (ClipboardLooksUnusable)
+        {
+            FileLogger.Info("Clipboard still looks contended — typing the transcript directly (fast path).");
+            await Task.Run(() => SendUnicodeText(text));
+            return;
+        }
+
         if (!_restoreClipboard)
         {
             var placed = await Application.Current.Dispatcher.InvokeAsync(
@@ -143,6 +182,7 @@ public class TextOutputService : ITextOutputService
                 seqAfterSet = NativeMethods.GetClipboardSequenceNumber();
         });
 
+            NoteClipboardFailure();
         if (saved == null)
         {
             FileLogger.Error("Could not read the clipboard to save it - typing the transcript directly so the user's copy is not lost.");
@@ -156,6 +196,7 @@ public class TextOutputService : ITextOutputService
         if (!placedTranscript)
         {
             FileLogger.Error("Could not place the transcript on the clipboard - typing it directly.");
+            NoteClipboardFailure();
             // A failed set can leave the clipboard emptied; put the user's copy back if anything moved.
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
@@ -166,6 +207,7 @@ public class TextOutputService : ITextOutputService
             return;
         }
 
+        NoteClipboardSuccess();
         FileLogger.Info("Sending Ctrl+V...");
         SendCtrlV();
 
@@ -197,7 +239,8 @@ public class TextOutputService : ITextOutputService
     /// <summary>Sets the clipboard, retrying while another app has it open.</summary>
     private static bool TrySetClipboard(Func<WpfDataObject> build)
     {
-        for (int attempt = 0; attempt < 8; attempt++)
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        for (int attempt = 0; attempt < 8 && sw.ElapsedMilliseconds < ClipboardBudgetMs; attempt++)
         {
             try
             {
@@ -308,7 +351,8 @@ public class TextOutputService : ITextOutputService
         /// </summary>
         public static ClipboardSnapshot? Capture()
         {
-            for (int attempt = 0; attempt < 8; attempt++)
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            for (int attempt = 0; attempt < 8 && sw.ElapsedMilliseconds < ClipboardBudgetMs; attempt++)
             {
                 try
                 {
@@ -375,7 +419,8 @@ public class TextOutputService : ITextOutputService
         public bool Restore()
         {
             Exception? last = null;
-            for (int attempt = 0; attempt < 8; attempt++)
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            for (int attempt = 0; attempt < 8 && sw.ElapsedMilliseconds < ClipboardBudgetMs; attempt++)
             {
                 if (attempt == 4)
                 {
