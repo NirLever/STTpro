@@ -37,6 +37,15 @@ public class AppOrchestrator : IDisposable
     private int _selectedPromptIndex = -1; // -1 = no prompt, 0+ = prompt index
 
     // Chunked transcription state
+    // How long to wait for straggling chunk transcriptions before finishing without them.
+    private const int ChunkWaitGraceSeconds = 8;
+    // Last-resort recovery: if a cycle is wedged this long, force back to Idle so the user
+    // never has to restart the app (this happened 9 times in the logs).
+    private const int StuckRecoverySeconds = 90;
+
+    private DateTime _stateSinceUtc = DateTime.UtcNow;
+    private System.Threading.Timer? _watchdog;
+
     private readonly List<string> _chunkResults = new();
     private readonly List<Task> _chunkTasks = new();
 
@@ -161,14 +170,26 @@ public class AppOrchestrator : IDisposable
             FileLogger.Info($"Registered {enabledPrompts.Count} prompt hotkeys, mode={s.PromptHotkeyMode}");
         }
 
+        StartWatchdog();
         FileLogger.Info("Orchestrator initialized successfully.");
     }
+
+    private DateTime _lastBusyNoticeUtc = DateTime.MinValue;
 
     private void OnHoldToTalkStarted(object? sender, EventArgs e)
     {
         if (_state != AppState.Idle)
         {
             FileLogger.Info($"Hold-to-talk: key DOWN ignored (state={_state})");
+            // Tell the user instead of dropping it silently — a dead-feeling hotkey was the
+            // single most confusing symptom when a transcription ran long.
+            if ((DateTime.UtcNow - _lastBusyNoticeUtc).TotalSeconds > 4)
+            {
+                _lastBusyNoticeUtc = DateTime.UtcNow;
+                _notifications.ShowInfo(_state == AppState.Transcribing
+                    ? "Still transcribing the last clip…"
+                    : $"Busy ({_state}) — one moment.");
+            }
             return;
         }
         FileLogger.Info("Hold-to-talk: key DOWN -> starting recording");
@@ -519,14 +540,28 @@ public class AppOrchestrator : IDisposable
             audioStream.Dispose();
         }
 
-        // Wait for all in-flight chunk transcriptions to complete
+        // Wait for in-flight chunk transcriptions — but never indefinitely. A single stalled
+        // request used to hold this for the full 30s HttpClient timeout, freezing the app in
+        // Transcribing and silently swallowing every hotkey press until it gave up.
         Task[] pending;
         lock (_chunkTasks) { pending = _chunkTasks.ToArray(); }
         if (pending.Length > 0)
         {
             int remaining = pending.Count(t => !t.IsCompleted);
-            FileLogger.Info($"Waiting for {remaining} of {pending.Length} chunk transcription(s)...");
-            await Task.WhenAll(pending);
+            if (remaining > 0)
+                FileLogger.Info($"Waiting for {remaining} of {pending.Length} chunk transcription(s)...");
+
+            var all = Task.WhenAll(pending);
+            var grace = TimeSpan.FromSeconds(ChunkWaitGraceSeconds);
+            if (await Task.WhenAny(all, Task.Delay(grace)).ConfigureAwait(false) != all)
+            {
+                int late = pending.Count(t => !t.IsCompleted);
+                FileLogger.Info($"Gave up waiting after {ChunkWaitGraceSeconds}s — {late} chunk(s) still in flight; " +
+                                "finishing with the text that did arrive.");
+            }
+
+            // Never leave a faulted task unobserved (chunk tasks catch internally, but be safe).
+            _ = all.ContinueWith(t => { _ = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         // Check if final segment is silence/noise (Whisper hallucinates Korean/Japanese on silence)
@@ -700,7 +735,36 @@ public class AppOrchestrator : IDisposable
     {
         FileLogger.Info($"State: {_state} -> {newState}");
         _state = newState;
+        _stateSinceUtc = DateTime.UtcNow;
         StateChanged?.Invoke(this, newState);
+    }
+
+    /// <summary>
+    /// Safety net so a wedged transcription can never strand the app. Without this the state
+    /// machine could sit in Transcribing forever and every hotkey press was silently dropped,
+    /// forcing a restart.
+    /// </summary>
+    private void StartWatchdog()
+    {
+        _watchdog = new System.Threading.Timer(_ =>
+        {
+            try
+            {
+                // Only guard the transient states. Recording is user-controlled and can legitimately
+                // run for minutes (toggle mode), so it must never be interrupted here.
+                if (_state is not (AppState.Transcribing or AppState.PostProcessing)) return;
+                var stuckFor = DateTime.UtcNow - _stateSinceUtc;
+                if (stuckFor.TotalSeconds < StuckRecoverySeconds) return;
+
+                FileLogger.Error($"Stuck in {_state} for {stuckFor.TotalSeconds:F0}s — forcing back to Idle.",
+                    new TimeoutException("Transcription cycle watchdog"));
+                _holdToTalkActive = false;
+                _isToggleRecording = false;
+                SetState(AppState.Idle);
+                _notifications.ShowError("Transcription timed out — ready again.");
+            }
+            catch (Exception ex) { FileLogger.Error("Watchdog failure", ex); }
+        }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
     }
 
     private static void FocusWindow(IntPtr hwnd)
@@ -761,6 +825,8 @@ public class AppOrchestrator : IDisposable
         _hotkeys.HoldToTalkEnded -= OnHoldToTalkEnded;
         _hotkeys.ToggleRecordingPressed -= OnToggleRecordingPressed;
         _hotkeys.PasteLastTranscriptPressed -= OnPasteLastTranscriptPressed;
+        _watchdog?.Dispose();
+        _watchdog = null;
         _audio.SilenceDetected -= OnSilenceDetected;
         _hotkeys.PromptSelected -= OnPromptSelected;
         _hotkeys.PromptReleased -= OnPromptReleased;
