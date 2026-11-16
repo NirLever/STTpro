@@ -69,7 +69,7 @@ swift run STTproCoreChecks       # unit checks: providers, punctuation, history 
 
 The script uses `xcodebuild` when full Xcode is installed (or `BUILD_TOOL=xcodebuild`) and SwiftPM otherwise. You can also open `mac/Package.swift` in Xcode.
 
-**First run.** A welcome window walks you through setup:
+**First run.** The Settings window opens with a *Finish setup* card at the top that walks you through:
 
 1. **Microphone.** macOS asks the first time you record. The mic is on only while you're dictating.
 2. **Accessibility.** Lets STTpro press ⌘V in the app you're typing in. Turn on STTpro under *System Settings › Privacy & Security › Accessibility*. Without it, the text is left on the clipboard for you to paste.
@@ -86,9 +86,30 @@ The script uses `xcodebuild` when full Xcode is installed (or `BUILD_TOOL=xcodeb
 
 **Where things live:** settings are in `~/Library/Application Support/STTpro/settings.json`, history in `~/Library/Application Support/STTpro/history.db` (same schema as Windows), and logs in `~/Library/Logs/STTpro/sttpro.log`.
 
-**Rebuilding:** local builds are ad-hoc signed, so after each rebuild macOS treats STTpro as a new app. You may need to turn Accessibility off and on again for it, and click *Always Allow* when it first reads your key from the Keychain. To avoid this, sign with your own certificate: `SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" scripts/build-app.sh --install`.
+**Keeping permissions across rebuilds:** local builds are ad-hoc signed by default, and macOS ties the Accessibility grant to that exact build. After a rebuild the toggle in System Settings can still look on while STTpro is no longer trusted. Run this once to create a local signing certificate (macOS asks for your password to trust it):
 
-**Not yet ported from Windows:** silence-based chunked transcription, microphone picker (uses the macOS default input), direct Unicode typing output, pre-roll buffer, and JSON/text history export.
+```bash
+scripts/create-signing-cert.sh   # one time
+scripts/build-app.sh --install   # now signs with "STTpro Local Code Signing"
+```
+
+If Accessibility already looks on but Settings still shows it red, click **Reset & ask again**, switch STTpro on, then click **Relaunch STTpro** (all in the *Finish setup* card). To use an Apple Development certificate instead: `SIGN_IDENTITY="Apple Development: …" scripts/build-app.sh --install`.
+
+**Look and feel:** the Mac UI reuses the Windows palette (`Themes/Palette.*.xaml`), card layout, tabs, buttons and recording pill. That includes the live waveform, "no mic signal" warning, stop/cancel buttons and the "Recording with: …" prompt toast. Light and dark follow macOS, or you can choose one under *Options › Appearance*.
+
+**Differences from Windows, and why:**
+
+| Windows | macOS | Why |
+| --- | --- | --- |
+| Blue tray icon | Monochrome 🎙 menu-bar icon, red while recording | macOS menu-bar icons are template images that adapt to the menu-bar color |
+| Segoe UI | SF Pro (system font) | Segoe UI isn't available on macOS |
+| Tray balloon notifications | Short messages in the recording pill | Avoids asking for notification permission |
+| Direct Unicode typing output | Not offered | Paste via ⌘V is reliable on macOS, including Hebrew |
+| Silence-based chunked transcription, 300 ms pre-roll | Not yet | The mic is opened only while you dictate (no always-on buffer) |
+| Red border around the target window | Not ported | On Windows it is created but never shown |
+| — | *Finish setup* (Permissions) card | macOS needs Microphone and Accessibility consent |
+
+`STTpro --snapshot <dir>` renders the Settings, History and pill views to PNGs in light and dark, for checking visuals without screen recording.
 
 ## Project layout
 

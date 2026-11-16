@@ -17,7 +17,7 @@ final class Orchestrator: ObservableObject {
     let hud = RecordingHUD()
 
     /// Called when the user needs to fix something in Settings (e.g. API key).
-    var openSettings: ((SettingsTab) -> Void)?
+    var openSettings: ((SettingsSection) -> Void)?
 
     private var isToggleRecording = false
     private var holdActive = false
@@ -27,7 +27,16 @@ final class Orchestrator: ObservableObject {
     init(store: SettingsStore, history: HistoryStore?) {
         self.store = store
         self.history = history
-        recorder.prewarm()
+        recorder.onLevel = { [weak self] level in self?.hud.setLevel(level) }
+        hud.onStop = { [weak self] in self?.stopFromUI() }
+        hud.onCancel = { [weak self] in self?.cancelRecording() }
+    }
+
+    /// Pill "stop" button: finish and transcribe (same as releasing the hotkey).
+    func stopFromUI() {
+        guard state == .recording else { return }
+        holdActive = false
+        stopAndTranscribe()
     }
 
     private var settings: AppSettings { store.settings }
@@ -71,7 +80,8 @@ final class Orchestrator: ObservableObject {
             } else if selectedPromptIndex != index {
                 selectedPromptIndex = index
                 activePromptName = prompts[index].prompt.name
-                hud.show(.recording(prompt: activePromptName))
+                hud.setPrompt(activePromptName)
+                hud.showPromptToast("Recording with: \(prompts[index].prompt.name)")
             }
             return
         }
@@ -80,6 +90,7 @@ final class Orchestrator: ObservableObject {
         activePromptName = prompts[index].prompt.name
         isToggleRecording = !hold
         startRecording()
+        if state == .recording { hud.showPromptToast("Recording with: \(prompts[index].prompt.name)") }
     }
 
     func promptReleased(_ index: Int) {
@@ -126,13 +137,12 @@ final class Orchestrator: ObservableObject {
                 let granted = await Permissions.requestMicrophone()
                 hud.show(.message(granted ? "Microphone enabled — press the hotkey again." : "Microphone access denied.",
                                   isError: !granted))
-                if granted { recorder.prewarm() }
             }
             return
         default:
             resetPrompt()
             hud.show(.message("Microphone access is off. Turn on STTpro in System Settings › Privacy › Microphone.", isError: true))
-            openSettings?(.permissions)
+            openSettings?(.setup)
             return
         }
 
@@ -147,7 +157,7 @@ final class Orchestrator: ObservableObject {
         targetApp = front?.processIdentifier == ProcessInfo.processInfo.processIdentifier ? nil : front
 
         do {
-            try recorder.start()
+            try recorder.start(deviceUID: settings.microphoneUID)
         } catch {
             Log.error("Failed to start recording", error)
             resetPrompt()
@@ -158,6 +168,8 @@ final class Orchestrator: ObservableObject {
         setState(.recording)
         if settings.playSoundCues { NSSound(named: "Tink")?.play() }
         hud.enabled = settings.showRecordingIndicator
+        hud.setTarget(pid: targetApp?.processIdentifier)
+        hud.setPrompt(activePromptName)
         hud.show(.recording(prompt: activePromptName))
     }
 
@@ -176,7 +188,7 @@ final class Orchestrator: ObservableObject {
         }
 
         setState(.transcribing)
-        hud.show(.working("Transcribing…"))
+        hud.show(.working("Transcribing..."))
         let promptIndex = selectedPromptIndex
         let target = targetApp
         Task { await process(audioURL: url, recordedSeconds: duration, promptIndex: promptIndex, target: target) }
@@ -235,7 +247,7 @@ final class Orchestrator: ObservableObject {
         if let promptIndex, s.enabledPromptBindings.indices.contains(promptIndex) {
             let prompt = s.enabledPromptBindings[promptIndex].prompt
             setState(.postProcessing)
-            hud.show(.working("\(prompt.name)…"))
+            hud.show(.working("Processing..."))
             let llm = OpenAICompatibleLLM(
                 baseUrl: ApiProviders.effectiveBaseUrl(s.llmProvider, isStt: false),
                 apiKey: ApiProviders.requiresApiKey(s.llmProvider.providerType) ? KeychainStore.load(slot: s.effectiveLlmKeySlot) : nil,

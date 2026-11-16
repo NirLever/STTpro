@@ -5,9 +5,11 @@ import STTproCore
 /// Observable wrapper around settings.json; every change is saved.
 @MainActor
 final class SettingsStore: ObservableObject {
+    private let persists: Bool
+
     @Published var settings: AppSettings {
         didSet {
-            guard settings != oldValue else { return }
+            guard persists, settings != oldValue else { return }
             do { try SettingsFile.save(settings) } catch { Log.error("Saving settings failed", error) }
         }
     }
@@ -15,14 +17,18 @@ final class SettingsStore: ObservableObject {
     /// Bumped when a Keychain key is saved/removed so views refresh.
     @Published var keychainRevision = 0
 
-    init() {
-        settings = SettingsFile.load()
+    init(inMemory: Bool = false) {
+        persists = !inMemory
+        settings = inMemory ? AppSettings() : SettingsFile.load()
     }
 
-    func apiKey(slot: String) -> String? { KeychainStore.load(slot: slot) }
+    /// "…abcd" for a saved key, nil when none. (In-memory stores never touch the Keychain.)
+    func keyHint(slot: String) -> String? {
+        persists ? KeychainStore.maskedHint(slot: slot) : nil
+    }
 
     var sttKeyMissing: Bool {
         ApiProviders.requiresApiKey(settings.sttProvider.providerType)
-            && !KeychainStore.hasKey(slot: settings.sttProvider.apiKeySlot)
+            && keyHint(slot: settings.sttProvider.apiKeySlot) == nil
     }
 }

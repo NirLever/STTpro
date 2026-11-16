@@ -13,6 +13,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private var statusItem: NSStatusItem!
     private var settingsWindow: NSWindow?
+    private var historyWindow: NSWindow?
+    private lazy var historyModel = HistoryModel(store: history)
     private var cancellables = Set<AnyCancellable>()
 
     // Hotkey IDs
@@ -25,8 +27,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             Log.error("Could not open history database", error)
         }
         orchestrator = Orchestrator(store: store, history: history)
-        orchestrator.openSettings = { [weak self] tab in self?.showSettings(tab: tab) }
+        orchestrator.openSettings = { [weak self] section in self?.showSettings(section: section) }
 
+        Theme.apply(mode: store.settings.themeMode)
         NSApp.mainMenu = Self.makeMainMenu()
         setUpStatusItem()
         registerHotkeys()
@@ -54,15 +57,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let s = store.settings
         if !s.hasCompletedOnboarding {
             store.settings.hasCompletedOnboarding = true
-            showSettings(tab: .welcome)
-            return
-        }
-        if !Permissions.microphoneGranted || !Permissions.accessibilityGranted {
-            showSettings(tab: .permissions)
-        } else if store.sttKeyMissing {
-            showSettings(tab: .providers)
-        } else if SystemShortcutConflicts.conflict(for: s.holdToTalkHotkey) != nil {
-            showSettings(tab: .general)
+            showSettings(section: .setup)
+        } else if !Permissions.microphoneGranted || !Permissions.accessibilityGranted || store.sttKeyMissing
+                    || SystemShortcutConflicts.conflict(for: s.holdToTalkHotkey) != nil {
+            showSettings(section: .setup)
         }
     }
 
@@ -186,80 +184,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func toggleRecording() { orchestrator.toggleFromMenu() }
     @objc private func cancelRecording() { orchestrator.cancelRecording() }
     @objc private func pasteLast() { orchestrator.pasteLast() }
-    @objc private func openHistory() { showSettings(tab: .history) }
-    @objc private func openSettingsMenu() { showSettings(tab: navigation.tab == .welcome ? .general : navigation.tab) }
-    @objc private func openSetup() {
-        showSettings(tab: (!Permissions.microphoneGranted || !Permissions.accessibilityGranted) ? .permissions : .providers)
-    }
+    @objc private func openHistory() { showHistoryWindow() }
+    @objc private func openSettingsMenu() { showSettings(section: nil) }
+    @objc private func openSetup() { showSettings(section: .setup) }
     @objc private func quit() { NSApp.terminate(nil) }
 
     // MARK: - Settings window
 
-    func showSettings(tab: SettingsTab) {
-        navigation.tab = tab
+    func showSettings(section: SettingsSection?) {
+        navigation.tab = .settings
         if settingsWindow == nil {
-            let root = SettingsView()
+            let root = MainWindowView()
                 .environmentObject(store)
                 .environmentObject(navigation)
-                .environmentObject(HistoryModel(store: history))
-                .environment(\.reregisterHotkeys, { [weak self] in self?.registerHotkeys() })
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 560),
-                                  styleMask: [.titled, .closable, .miniaturizable, .resizable],
-                                  backing: .buffered, defer: false)
-            window.title = "STTpro Settings"
-            window.contentView = NSHostingView(rootView: root)
-            window.isReleasedWhenClosed = false
-            window.setFrameAutosaveName("STTproSettings")
-            if !window.setFrameUsingName("STTproSettings") { window.center() }
-            window.minSize = NSSize(width: 640, height: 480)
-            settingsWindow = window
+                .environmentObject(historyModel)
+            settingsWindow = makeWindow(title: "STTpro", autosave: "STTproSettings",
+                                        size: NSSize(width: 560, height: 760), min: NSSize(width: 480, height: 520),
+                                        content: NSHostingView(rootView: root))
         }
+        navigation.scrollTarget = section
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
     }
-}
 
-/// Which settings tab is shown, plus hotkey registration problems to surface.
-@MainActor
-final class SettingsNavigation: ObservableObject {
-    @Published var tab: SettingsTab = .general
-    @Published var failedHotkeys: [HotkeyBinding] = []
-}
-
-enum SettingsTab: String, CaseIterable, Identifiable {
-    case welcome, general, providers, prompts, history, permissions, usage
-    var id: String { rawValue }
-    var title: String {
-        switch self {
-        case .welcome: return "Welcome"
-        case .general: return "General"
-        case .providers: return "Providers"
-        case .prompts: return "Smart Prompts"
-        case .history: return "History"
-        case .permissions: return "Permissions"
-        case .usage: return "Usage"
+    /// Separate "Transcript History" window (HistoryWindow.xaml).
+    func showHistoryWindow() {
+        if historyWindow == nil {
+            let root = HistoryPage(showsTitle: true).environmentObject(historyModel)
+            historyWindow = makeWindow(title: "STTpro - Transcript History", autosave: "STTproHistory",
+                                       size: NSSize(width: 680, height: 580), min: NSSize(width: 480, height: 400),
+                                       content: NSHostingView(rootView: root))
         }
+        historyModel.reload()
+        NSApp.activate(ignoringOtherApps: true)
+        historyWindow?.makeKeyAndOrderFront(nil)
     }
-    var symbol: String {
-        switch self {
-        case .welcome: return "hand.wave"
-        case .general: return "gearshape"
-        case .providers: return "network"
-        case .prompts: return "sparkles"
-        case .history: return "clock.arrow.circlepath"
-        case .permissions: return "lock.shield"
-        case .usage: return "chart.bar"
+
+    private func makeWindow(title: String, autosave: String, size: NSSize, min: NSSize, content: NSView) -> NSWindow {
+        let window = NSWindow(contentRect: NSRect(origin: .zero, size: size),
+                              styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                              backing: .buffered, defer: false)
+        window.title = title
+        window.contentView = content
+        window.isReleasedWhenClosed = false
+        window.minSize = min
+        window.setFrameAutosaveName(autosave)
+        if !window.setFrameUsingName(autosave) {
+            window.setContentSize(size)
+            window.center()
         }
-    }
-}
-
-private struct ReregisterHotkeysKey: EnvironmentKey {
-    static let defaultValue: () -> Void = {}
-}
-
-extension EnvironmentValues {
-    var reregisterHotkeys: () -> Void {
-        get { self[ReregisterHotkeysKey.self] }
-        set { self[ReregisterHotkeysKey.self] = newValue }
+        return window
     }
 }

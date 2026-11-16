@@ -114,6 +114,12 @@ public enum PromptHotkeyMode: String, Codable, CaseIterable, Identifiable {
 
 public struct AppSettings: Codable, Equatable {
     public var languageHint: String? = nil
+    /// CoreAudio device UID; nil = system default input.
+    public var microphoneUID: String? = nil
+    /// Remembered so a mic that's unplugged can still be shown by name.
+    public var microphoneName: String? = nil
+    /// "system" (follow macOS), "light" or "dark".
+    public var themeMode = "system"
     public var outputMode: OutputMode = .clipboardPaste
 
     public var sttProvider = ApiProviderConfig(providerType: "openai", apiKeySlot: "openai", model: "whisper-1")
@@ -169,6 +175,9 @@ public struct AppSettings: Codable, Equatable {
             (try? c.decodeIfPresent(T.self, forKey: key)) ?? current
         }
         languageHint = (try? c.decodeIfPresent(String.self, forKey: .languageHint)) ?? nil
+        microphoneUID = (try? c.decodeIfPresent(String.self, forKey: .microphoneUID)) ?? nil
+        microphoneName = (try? c.decodeIfPresent(String.self, forKey: .microphoneName)) ?? nil
+        themeMode = get(.themeMode, themeMode)
         outputMode = get(.outputMode, outputMode)
         sttProvider = get(.sttProvider, sttProvider)
         llmProvider = get(.llmProvider, llmProvider)
