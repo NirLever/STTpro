@@ -86,12 +86,7 @@ The script uses `xcodebuild` when full Xcode is installed (or `BUILD_TOOL=xcodeb
 
 **Where things live:** settings are in `~/Library/Application Support/STTpro/settings.json`, history in `~/Library/Application Support/STTpro/history.db` (same schema as Windows), and logs in `~/Library/Logs/STTpro/sttpro.log`.
 
-**Keeping permissions across rebuilds:** local builds are ad-hoc signed by default, and macOS ties the Accessibility grant to that exact build. After a rebuild the toggle in System Settings can still look on while STTpro is no longer trusted. Run this once to create a local signing certificate (macOS asks for your password to trust it):
-
-```bash
-scripts/create-signing-cert.sh   # one time
-scripts/build-app.sh --install   # now signs with "STTpro Local Code Signing"
-```
+**Keeping permissions across rebuilds:** macOS ties the Accessibility grant to the app's code signature. `build-app.sh` therefore signs with a stable self-signed identity ("STTpro Local Code Signing"). `scripts/setup-local-signing.sh` creates it the first time, in a project-only keychain under `mac/.signing/` (git-ignored). It doesn't touch your login keychain or ask for a password. Use `SIGN_IDENTITY=-` to build ad-hoc, which makes macOS forget the grant after every rebuild.
 
 If Accessibility already looks on but Settings still shows it red, click **Reset & ask again**, switch STTpro on, then click **Relaunch STTpro** (all in the *Finish setup* card). To use an Apple Development certificate instead: `SIGN_IDENTITY="Apple Development: …" scripts/build-app.sh --install`.
 

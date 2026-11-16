@@ -91,7 +91,7 @@ struct PermissionsCard: View {
                         Text("Already switched on in System Settings but still red? That entry belongs to an older build. Click **Reset & ask again**, switch STTpro on in the list that opens, then **Relaunch STTpro**.")
                             .hintLabel().fixedSize(horizontal: false, vertical: true)
                         if adHoc {
-                            Text("This build is ad-hoc signed, so macOS forgets the permission after every rebuild. Run `mac/scripts/create-signing-cert.sh` once, then rebuild, to keep it.")
+                            Text("This build is ad-hoc signed, so macOS forgets the permission after every rebuild. Rebuild with `mac/scripts/build-app.sh` (without SIGN_IDENTITY=-) to sign it with the stable local identity.")
                                 .hintLabel().fixedSize(horizontal: false, vertical: true)
                         }
                     }
