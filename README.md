@@ -53,6 +53,43 @@ On first launch the Settings window opens automatically so you can pick a provid
 
 All hotkeys are rebindable in **Settings → Hotkeys**.
 
+## macOS (menu-bar app)
+
+A native Swift/SwiftUI version lives in [`mac/`](mac/) and is independent of the Windows code. It runs in the menu bar (microphone icon, no Dock icon) and covers the core loop: push-to-talk, toggle recording, paste last transcript, Smart Prompts, OpenAI-compatible STT/LLM providers with custom base URLs, local SQLite history, and Hebrew/multi-language support.
+
+**Requirements:** Apple Silicon Mac, macOS 14 or later, and either full Xcode or just the Command Line Tools (`xcode-select --install`).
+
+```bash
+cd mac
+scripts/build-app.sh            # builds mac/build/STTpro.app
+scripts/build-app.sh --install  # also copies it to /Applications (needed for "Launch at login")
+open build/STTpro.app
+swift test                      # unit tests for providers, punctuation, history
+```
+
+The script uses `xcodebuild` when full Xcode is installed (or `BUILD_TOOL=xcodebuild`) and SwiftPM otherwise. You can also open `mac/Package.swift` in Xcode.
+
+**First run.** A welcome window walks you through setup:
+
+1. **Microphone.** macOS asks the first time you record. The mic is on only while you're dictating.
+2. **Accessibility.** Lets STTpro press ⌘V in the app you're typing in. Turn on STTpro under *System Settings › Privacy & Security › Accessibility*. Without it, the text is left on the clipboard for you to paste.
+3. **API key.** Go to *Settings › Providers*, choose a provider, paste your key, and click Save. Keys are stored only in your login Keychain (item "STTpro API Key"), never in files, logs or the repo.
+
+| Action | Default shortcut |
+| --- | --- |
+| Hold to talk | `⌃ Space` |
+| Toggle recording | `⌃⇧ Space` |
+| Paste last transcription | `⌃⇧ V` |
+| Smart Prompt 1–9 | `⌃⇧ 1…9` |
+
+> **⌃Space and keyboard languages:** if you use more than one input source (e.g. English + Hebrew), macOS already uses ⌃Space for *Select the previous input source*. STTpro detects this and offers to switch to `⌥ Space`. You can also turn the macOS shortcut off in *System Settings › Keyboard › Keyboard Shortcuts › Input Sources* and switch languages with the 🌐 Globe key instead.
+
+**Where things live:** settings are in `~/Library/Application Support/STTpro/settings.json`, history in `~/Library/Application Support/STTpro/history.db` (same schema as Windows), and logs in `~/Library/Logs/STTpro/sttpro.log`.
+
+**Rebuilding:** local builds are ad-hoc signed, so after each rebuild macOS treats STTpro as a new app. You may need to turn Accessibility off and on again for it, and click *Always Allow* when it first reads your key from the Keychain. To avoid this, sign with your own certificate: `SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" scripts/build-app.sh --install`.
+
+**Not yet ported from Windows:** silence-based chunked transcription, microphone picker (uses the macOS default input), direct Unicode typing output, pre-roll buffer, and JSON/text history export.
+
 ## Project layout
 
 | Project | Responsibility |
@@ -61,6 +98,7 @@ All hotkeys are rebindable in **Settings → Hotkeys**.
 | `STTpro.Core` | Audio capture, STT/LLM providers, hotkeys, history, settings, secure storage |
 | `STTpro.Interop` | Win32 interop helpers |
 | `STTpro.Core.Tests` | Unit tests |
+| `mac/` | Native macOS menu-bar app (Swift Package: `STTproCore` + `STTpro`) |
 
 ## Privacy
 
